@@ -6,6 +6,7 @@ TEST = 'test'
 clean = { path = "bin", script = "rm maid" }
 test = { path = "bin", script = "./maid -h" }
 debug = { path = "", script = ["echo {{DEBUG}}", "echo {{TEST}}", "echo {{$1}}", "echo {{CWD}}"] }
+bad-task = { path = "", script = ["this_does_not_exist"] }
 
 [tasks.build]
 path = ""
