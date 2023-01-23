@@ -1,0 +1,11 @@
+[env]
+DEBUG = false
+TEST = true
+
+[tasks]
+clean = { path = "bin", script = "rm maid" }
+test = { path = "bin", script = "maid -h" }
+debug = { script = ["echo {{DEBUG}}", "echo {{TEST}}"] }
+
+[tasks.build]
+script = ["cargo build --release", "mv target/release/exact-maid bin/maid"]

@@ -1,0 +1,3 @@
+- [ ] dump env vars into env
+- [ ] somehow subsitute into string
+- [ ] use clap

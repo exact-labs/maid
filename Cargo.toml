@@ -1,0 +1,22 @@
+[package]
+name = "exact-maid"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/exact-rs/maid"
+description = "Make, but in rust"
+
+[dependencies]
+toml = "0.5.11"
+inquire = "0.5.3"
+colored = "2.0.0"
+clap = { version = "4.1.1", features = ["derive"] }
+just_macros = "0.1.2"
+clap-verbosity-flag = "2.0.0"
+env_logger = "0.10.0"
+log = "0.4.17"
+serde_derive = "1.0.152"
+serde = "1.0.152"
+text_placeholder = "0.4.0"
+termcolor = "1.2.0"
+
