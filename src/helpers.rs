@@ -12,9 +12,16 @@ pub fn value_error(debug_err: &str) {
 
 pub fn read_maidfile(path: &String) -> String {
     match fs::read_to_string(path) {
-        Ok(contents) => contents,
+        Ok(contents) => format!("[env]\n{contents}"),
         Err(_) => {
             crashln!("Cannot find maidfile. Does it exist?");
         }
     }
+}
+
+pub fn trim_start_end(value: &str) -> &str {
+    let mut chars = value.chars();
+    chars.next();
+    chars.next_back();
+    chars.as_str()
 }

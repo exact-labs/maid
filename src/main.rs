@@ -29,7 +29,7 @@ fn main() {
     env_logger::Builder::new().filter_level(cli.verbose.log_level_filter()).init();
 
     match &cli.command {
-        Some(Commands::Tasks) => cli::tasks::list(),
+        Some(Commands::Tasks) => cli::tasks::list(&cli.path, cli.verbose.is_silent()),
         None => cli::exec(&cli.task[0], &cli.task, &cli.path, cli.verbose.is_silent()),
     }
 }
