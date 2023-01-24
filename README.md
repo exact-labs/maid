@@ -1,6 +1,5 @@
 <p align="center"><img style="width: 300px;" src="https://cdn.justjs.dev/assets/svg/maid_title.svg" /></p>
-
-#
+<hr />
 Maid is a task runner / build tool that aims to be simpler and easier to use than, for example, GNU Make.
 Tasks are stored in a file called `maidfile` using the TOML syntax.
 
