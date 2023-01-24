@@ -15,12 +15,13 @@ pub struct Maidfile {
 pub struct Tasks {
     pub script: Value,
     pub path: String,
+    pub info: String,
 }
 
-pub fn exec(task: &String, args: &Vec<String>, path: &String, silent: bool) {
+pub fn exec(task: &String, args: &Vec<String>, path: &String, silent: bool, log_level: Option<log::Level>) {
     log::info!("starting maid {}", env!("CARGO_PKG_VERSION"));
     if task == "" {
-        tasks::list(path, silent)
+        tasks::list(path, silent, log_level)
     } else {
         let start = Instant::now();
         let values: Maidfile = match toml::from_str(&helpers::read_maidfile(path)) {

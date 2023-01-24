@@ -18,10 +18,3 @@ pub fn read_maidfile(path: &String) -> String {
         }
     }
 }
-
-pub fn trim_start_end(value: &str) -> &str {
-    let mut chars = value.chars();
-    chars.next();
-    chars.next_back();
-    chars.as_str()
-}

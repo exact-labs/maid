@@ -4,16 +4,16 @@ TEST = 'test'
 
 # tasks in table format
 [tasks]
-clean = { path = "bin", script = "rm maid" }
-test = { path = "bin", script = "./maid -h" }
-debug = { path = "", script = ["echo {{DEBUG}}", "echo {{TEST}}", "echo {{$1}}", "echo {{CWD}}"] }
-bad-task = { path = "", script = ["this_does_not_exist"] }
-
+clean = { info = "remove binary", path = "", script = "rm maid" }
+test = { info = "test maid", path = "", script = "./maid -h" }
+debug = { info = "debug env", path = "", script = ["echo {{DEBUG}}", "echo {{TEST}}", "echo {{$1}}", "echo {{CWD}}"] }
+bad-task = { info = "bad task", path = "", script = ["this_does_not_exist"] }
 
 # seperated task
 [tasks.build]
 path = ""
+info = "build maid"
 script = [
 "cargo build --release", 
-"mv target/release/exact-maid bin/maid",
+"mv target/release/exact-maid maid",
 ]
