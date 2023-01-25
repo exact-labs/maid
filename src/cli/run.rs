@@ -32,21 +32,21 @@ pub fn task(values: &cli::Maidfile, value: &Value, path: &String, args: &Vec<Str
                 }
             }
 
+            for (pos, arg) in args.iter().enumerate() {
+                log::debug!("Adding argument: ${pos} with value: {}", arg);
+                table.insert(helpers::string_to_static_str(format!("${pos}")), arg);
+            }
+
             for (key, value) in values.env.iter() {
                 let value_formatted = ternary!(
                     value.to_string().starts_with("\""),
-                    helpers::trim_start_end(helpers::string_to_static_str(value.to_string())),
-                    helpers::string_to_static_str(value.to_string())
+                    helpers::trim_start_end(helpers::string_to_static_str(Template::new(&value.to_string()).fill_with_hashmap(&table))),
+                    helpers::string_to_static_str(Template::new(&value.to_string()).fill_with_hashmap(&table))
                 );
 
                 env::set_var(key, value_formatted);
                 log::debug!("Adding env: {key} with value: {}", value_formatted);
                 table.insert(helpers::string_to_static_str(key.clone()), value_formatted);
-            }
-
-            for (pos, arg) in args.iter().enumerate() {
-                log::debug!("Adding argument: ${pos} with value: {}", arg);
-                table.insert(helpers::string_to_static_str(format!("${pos}")), arg);
             }
 
             let script = Template::new(string).fill_with_hashmap(&table);
