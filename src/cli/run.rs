@@ -34,8 +34,8 @@ pub fn task(values: &cli::Maidfile, value: &Value, path: &String, args: &Vec<Str
 
             for (key, value) in values.env.iter() {
                 env::set_var(key, value.to_string());
-                log::debug!("Adding env: {key} with value: {}", value.to_string());
-                table.insert(helpers::string_to_static_str(key.clone()), helpers::string_to_static_str(value.to_string()));
+                log::debug!("Adding env: {key} with value: {}", helpers::trim_start_end(&value.to_string()));
+                table.insert(helpers::string_to_static_str(key.clone()), helpers::trim_start_end(helpers::string_to_static_str(value.to_string())));
             }
 
             for (pos, arg) in args.iter().enumerate() {
