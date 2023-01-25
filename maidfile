@@ -5,16 +5,17 @@ ARR = ['hello', 'world']
 
 # tasks in table format
 [tasks]
-clean = { info = "remove binary", path = "", script = "rm arg:maid" }
-test = { info = "test maid", path = "", script = "maid arg:-h" }
-debug = { info = "debug env", path = "", script = ["echo a:{{DEBUG}}", "echo arg:{{TEST}}", "echo arg:{{$1}}", "echo arg:{{CWD}}", "echo arg:{{HOME}}", "echo arg:{{ARR}}"] }
+clean = { info = "remove binary", path = "", script = "rm maid" }
+test = { info = "test maid", path = "", script = "maid -h" }
+debug = { info = "debug env", path = "", script = ["echo {{DEBUG}}", "echo {{TEST}}", "echo {{$1}}", "echo {{CWD}}", "echo {{HOME}}", "echo {{ARR}}"] }
 bad-task = { info = "bad task", path = "", script = ["this_does_not_exist"] }
 
 # seperated task
+# script #2 uses :arg operator
 [tasks.build]
 path = ""
 info = "build maid"
 script = [
-"cargo arg:build arg:--release", 
+"cargo build --release", 
 "mv arg:target/release/exact-maid arg:maid",
 ]

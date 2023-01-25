@@ -43,11 +43,10 @@ pub fn exec(task: &String, args: &Vec<String>, path: &String, silent: bool, log_
         log::info!("Task: {}", task);
 
         if !silent {
-            let formatted_path = format!("({})", task_path.split('/').last().unwrap());
             ternary!(
                 task_path == cwd,
                 println!("{} {}", "»".white(), &values.tasks[task].script),
-                println!("{} {} {}", formatted_path.bright_cyan(), "»".white(), &values.tasks[task].script)
+                println!("{} {} {}", format!("({task_path})").bright_cyan(), "»".white(), &values.tasks[task].script)
             )
         }
         run::task(&values, &values.tasks[task].script, task_path, args);
