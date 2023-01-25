@@ -32,6 +32,10 @@ pub fn exec(task: &String, args: &Vec<String>, path: &String, silent: bool, log_
             }
         };
 
+        if values.tasks.get(task).is_none() {
+            crashln!("Maid could not find the task '{task}'. Does it exist?");
+        }
+
         let cwd = &String::from(env::current_dir().unwrap().to_string_lossy());
         log::info!("Working dir: {}", cwd);
 
