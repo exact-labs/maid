@@ -54,6 +54,9 @@ pub fn task(values: &cli::Maidfile, value: &Value, path: &String, args: &Vec<Str
             let mut args = script.split(" ").collect::<Vec<&str>>();
             args.remove(0);
 
+            log::debug!("Command name: {name}");
+            log::debug!("Command args: {:?}", args);
+
             log::info!("Execute Command: '{name} {}'", args.join(" "));
             let mut cmd = match Command::new(name)
                 .args(args.clone())
