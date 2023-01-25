@@ -1,6 +1,6 @@
 use crate::cli;
 use crate::helpers;
-use just_macros::{crashln, errorln};
+use just_macros::{crashln, errorln, ternary};
 use std::process::{Command, Stdio};
 use std::{collections::HashMap, env};
 use text_placeholder::Template;
@@ -33,9 +33,15 @@ pub fn task(values: &cli::Maidfile, value: &Value, path: &String, args: &Vec<Str
             }
 
             for (key, value) in values.env.iter() {
-                env::set_var(key, value.to_string());
-                log::debug!("Adding env: {key} with value: {}", helpers::trim_start_end(&value.to_string()));
-                table.insert(helpers::string_to_static_str(key.clone()), helpers::trim_start_end(helpers::string_to_static_str(value.to_string())));
+                let value_formatted = ternary!(
+                    value.to_string().starts_with("\""),
+                    helpers::trim_start_end(helpers::string_to_static_str(value.to_string())),
+                    helpers::string_to_static_str(value.to_string())
+                );
+
+                env::set_var(key, value_formatted);
+                log::debug!("Adding env: {key} with value: {}", value_formatted);
+                table.insert(helpers::string_to_static_str(key.clone()), value_formatted);
             }
 
             for (pos, arg) in args.iter().enumerate() {

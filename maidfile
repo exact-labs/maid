@@ -1,12 +1,13 @@
 # env goes at the top of the file
 DEBUG = false
 TEST = 'test'
+ARR = ['hello', 'world']
 
 # tasks in table format
 [tasks]
 clean = { info = "remove binary", path = "", script = "rm maid" }
 test = { info = "test maid", path = "", script = "./maid -h" }
-debug = { info = "debug env", path = "", script = ["echo {{DEBUG}}", "echo {{TEST}}", "echo {{$1}}", "echo {{CWD}}"] }
+debug = { info = "debug env", path = "", script = ["echo {{DEBUG}}", "echo {{TEST}}", "echo {{$1}}", "echo {{CWD}}", "echo {{HOME}}", "echo {{ARR}}"] }
 bad-task = { info = "bad task", path = "", script = ["this_does_not_exist"] }
 
 # seperated task
