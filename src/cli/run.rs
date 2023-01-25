@@ -50,7 +50,7 @@ pub fn task(values: &cli::Maidfile, value: &Value, path: &String, args: &Vec<Str
             }
 
             let script = Template::new(string).fill_with_hashmap(&table);
-            let name = script.split(" ").collect::<Vec<&str>>()[0];
+            let name = script.split(":").collect::<Vec<&str>>()[0];
             let mut args = script.split(" ").collect::<Vec<&str>>();
             args.remove(0);
 
