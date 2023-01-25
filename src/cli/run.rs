@@ -10,13 +10,22 @@ pub fn task(values: &cli::Maidfile, value: &Value, path: &String, args: &Vec<Str
     match value {
         Value::String(string) => {
             let mut table = HashMap::new();
-            table.insert("CWD", helpers::string_to_static_str(String::from(env::current_dir().unwrap().to_string_lossy())));
-            log::info!("Added working dir: {:?}", env::current_dir());
+
+            match env::current_dir() {
+                Ok(path) => {
+                    table.insert("CWD", helpers::string_to_static_str(String::from(path.to_string_lossy())));
+                    log::info!("Added working dir: {}", path.display());
+                }
+                Err(err) => {
+                    log::warn!("{err}");
+                    errorln!("Home directory could not be added as script variable.");
+                }
+            }
 
             match home::home_dir() {
                 Some(path) => {
                     table.insert("HOME", helpers::string_to_static_str(String::from(path.to_string_lossy())));
-                    log::info!("Added home dir: {:?}", env::current_dir());
+                    log::info!("Added home dir: {}", path.display());
                 }
                 None => {
                     errorln!("Home directory could not be added as script variable.");
