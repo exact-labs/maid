@@ -1,5 +1,6 @@
 mod cli;
 mod helpers;
+mod shell;
 
 use clap::{Parser, Subcommand};
 use clap_verbosity_flag::Verbosity;

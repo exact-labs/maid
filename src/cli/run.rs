@@ -1,5 +1,6 @@
 use crate::cli;
 use crate::helpers;
+use crate::shell::IntoArgs;
 use just_macros::{crashln, errorln, ternary};
 use std::process::{Command, Stdio};
 use std::{collections::HashMap, env};
@@ -50,16 +51,25 @@ pub fn task(values: &cli::Maidfile, value: &Value, path: &String, args: &Vec<Str
             }
 
             let script = Template::new(string).fill_with_hashmap(&table);
-            let name = script.split(" ").collect::<Vec<&str>>()[0];
-            let mut args = ternary!(script.contains(" arg:"), script.split(" arg:").collect::<Vec<&str>>(), script.split(" ").collect::<Vec<&str>>());
-            args.remove(0);
+            let (name, args) = match script.try_into_args() {
+                Ok(result) => {
+                    let mut args = result.clone();
+
+                    args.remove(0);
+                    (result[0].clone(), args)
+                }
+                Err(err) => {
+                    log::warn!("{err}");
+                    crashln!("Script could not be parsed into args");
+                }
+            };
 
             log::debug!("Parsed Script: {}", script);
             log::debug!("Command name: {name}");
             log::debug!("Command args: {:?}", args);
 
             log::info!("Execute Command: '{name} {}'", args.join(" "));
-            let mut cmd = match Command::new(name)
+            let mut cmd = match Command::new(&name)
                 .args(args.clone())
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit())

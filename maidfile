@@ -18,5 +18,5 @@ path = ""
 info = "build maid"
 script = [
 "cargo build --release", 
-"mv arg:target/release/exact-maid arg:maid",
+"mv target/release/exact-maid maid",
 ]
