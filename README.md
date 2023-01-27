@@ -9,7 +9,7 @@ Tasks are stored in a file called `maidfile` using the TOML syntax.
 
 ### Quick Start
 
-See the [installation](#installation) section for how to install just on your computer. Try running maid --version to make sure that it's installed correctly.
+See the [installation](#installation) section for how to install just on your computer. Try running `maid --version` to make sure that it's installed correctly.
 
 Once maid is installed and working, create a file named maidfile in the root of your project with the following contents:
 
@@ -28,6 +28,8 @@ Running maid with no arguments shows a list of tasks in the maidfile:
 > hello: this is a comment
 [↑↓ to move, enter to select, type to filter]
 ```
+
+For more commands, check out `maid --help`
 
 ### Installation
 
