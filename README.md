@@ -1,6 +1,7 @@
 <p align="center"><img style="width: 300px;" src="https://cdn.justjs.dev/assets/svg/maid_title.svg" /></p>
 
 ##
+
 Maid is a task runner / build tool that aims to be simpler and easier to use than, for example, GNU Make.
 Tasks are stored in a file called `maidfile` using the TOML syntax.
 
@@ -22,7 +23,7 @@ script = "echo 'hello world'"
 Running maid with no arguments shows a list of tasks in the maidfile:
 
 ```bash
-$ maid
+~ $ maid
 ? Select a task to run:
 > hello: this is a comment
 [↑↓ to move, enter to select, type to filter]
