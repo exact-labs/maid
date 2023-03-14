@@ -1,6 +1,7 @@
 use crate::cli;
 use crate::helpers;
 use crate::shell::IntoArgs;
+use colored::Colorize;
 use just_macros::{crashln, errorln, ternary};
 use std::process::{Command, Stdio};
 use std::{collections::HashMap, env};
@@ -12,21 +13,27 @@ pub fn task(values: &cli::Maidfile, value: &Value, path: &String, args: &Vec<Str
         Value::String(string) => {
             let mut table = HashMap::new();
 
+            table.insert("os.platform", env::consts::OS);
+            table.insert("os.arch", env::consts::ARCH);
+
+            log::info!("{} os.platform: '{}'", helpers::add_icon(), env::consts::OS.yellow());
+            log::info!("{} os.arch: '{}'", helpers::add_icon(), env::consts::ARCH.yellow());
+
             match env::current_dir() {
                 Ok(path) => {
-                    table.insert("CWD", helpers::string_to_static_str(String::from(path.to_string_lossy())));
-                    log::info!("Added working dir: {}", path.display());
+                    table.insert("dir.current", helpers::path_to_str(&path));
+                    log::info!("{} dir.current: '{}'", helpers::add_icon(), helpers::path_to_str(&path).yellow());
                 }
                 Err(err) => {
                     log::warn!("{err}");
-                    errorln!("Home directory could not be added as script variable.");
+                    errorln!("Current directory could not be added as script variable.");
                 }
             }
 
             match home::home_dir() {
                 Some(path) => {
-                    table.insert("HOME", helpers::string_to_static_str(String::from(path.to_string_lossy())));
-                    log::info!("Added home dir: {}", path.display());
+                    table.insert("dir.home", helpers::path_to_str(&path));
+                    log::info!("{} dir.home: '{}'", helpers::add_icon(), helpers::path_to_str(&path).yellow());
                 }
                 None => {
                     errorln!("Home directory could not be added as script variable.");
@@ -34,23 +41,23 @@ pub fn task(values: &cli::Maidfile, value: &Value, path: &String, args: &Vec<Str
             }
 
             for (pos, arg) in args.iter().enumerate() {
-                log::debug!("Adding argument: ${pos} with value: {}", arg);
-                table.insert(helpers::string_to_static_str(format!("${pos}")), arg);
+                log::info!("{} arg.{pos}: '{}'", helpers::add_icon(), arg.yellow());
+                table.insert(helpers::string_to_static_str(format!("arg.{pos}")), arg);
             }
 
             for (key, value) in values.env.iter() {
                 let value_formatted = ternary!(
                     value.to_string().starts_with("\""),
-                    helpers::trim_start_end(helpers::string_to_static_str(Template::new(&value.to_string()).fill_with_hashmap(&table))),
-                    helpers::string_to_static_str(Template::new(&value.to_string()).fill_with_hashmap(&table))
+                    helpers::trim_start_end(helpers::string_to_static_str(Template::new_with_placeholder(&value.to_string(), "{", "}").fill_with_hashmap(&table))),
+                    helpers::string_to_static_str(Template::new_with_placeholder(&value.to_string(), "{", "}").fill_with_hashmap(&table))
                 );
 
                 env::set_var(key, value_formatted);
-                log::debug!("Adding env: {key} with value: {}", value_formatted);
-                table.insert(helpers::string_to_static_str(key.clone()), value_formatted);
+                log::info!("{} env.{key}: '{}'", helpers::add_icon(), value_formatted.yellow());
+                table.insert(helpers::string_to_static_str(format!("env.{}", key.clone())), value_formatted);
             }
 
-            let script = Template::new(string).fill_with_hashmap(&table);
+            let script = Template::new_with_placeholder(string, "{", "}").fill_with_hashmap(&table);
             let (name, args) = match script.try_into_args() {
                 Ok(result) => {
                     let mut args = result.clone();
@@ -64,9 +71,10 @@ pub fn task(values: &cli::Maidfile, value: &Value, path: &String, args: &Vec<Str
                 }
             };
 
+            log::debug!("Original Script: {}", string);
             log::debug!("Parsed Script: {}", script);
-            log::debug!("Command name: {name}");
-            log::debug!("Command args: {:?}", args);
+            log::trace!("Command name: {name}");
+            log::trace!("Command args: {:?}", args);
 
             log::info!("Execute Command: '{name} {}'", args.join(" "));
             let mut cmd = match Command::new(&name)
@@ -87,11 +95,12 @@ pub fn task(values: &cli::Maidfile, value: &Value, path: &String, args: &Vec<Str
             let status = cmd.wait();
             let exit_code = status.as_ref().unwrap().code().unwrap();
 
-            log::info!("Finished script: '{name} {}' with exit code: {:?}", args.join(" "), exit_code);
+            log::debug!("Finished script: '{name} {}' with exit code: {:?}", args.join(" "), exit_code);
             if !status.as_ref().unwrap().success() {
                 crashln!("✖ exited with status code {}", exit_code);
             }
         }
+
         Value::Array(array) => {
             let result = match IntoIterator::into_iter(array.iter()) {
                 mut iter => loop {

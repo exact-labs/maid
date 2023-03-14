@@ -1,3 +1,4 @@
+use colored::{ColoredString, Colorize};
 use just_macros::{crashln, errorln};
 use std::{env, fs, path::Path, path::PathBuf};
 
@@ -16,8 +17,16 @@ pub fn find_file(starting_directory: &Path, filename: &String) -> Option<PathBuf
     }
 }
 
-pub fn string_to_static_str(s: String) -> &'static str {
-    Box::leak(s.into_boxed_str())
+pub fn string_to_static_str(str: String) -> &'static str {
+    Box::leak(str.into_boxed_str())
+}
+
+pub fn add_icon() -> ColoredString {
+    "+".green()
+}
+
+pub fn path_to_str(path: &Path) -> &'static str {
+    string_to_static_str(String::from(path.to_string_lossy()))
 }
 
 pub fn value_error(debug_err: &str) {

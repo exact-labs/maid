@@ -19,7 +19,7 @@ pub struct Tasks {
 }
 
 pub fn exec(task: &String, args: &Vec<String>, path: &String, silent: bool, log_level: Option<log::Level>) {
-    log::info!("starting maid {}", env!("CARGO_PKG_VERSION"));
+    log::info!("Starting maid {}", env!("CARGO_PKG_VERSION"));
     if task == "" {
         tasks::list(path, silent, log_level)
     } else {
@@ -37,10 +37,10 @@ pub fn exec(task: &String, args: &Vec<String>, path: &String, silent: bool, log_
         }
 
         let cwd = &String::from(env::current_dir().unwrap().to_string_lossy());
-        log::info!("Working dir: {}", cwd);
+        log::debug!("Working dir: {}", cwd);
 
         let task_path = ternary!(&values.tasks[task].path != "", &values.tasks[task].path, cwd);
-        log::info!("Task: {}", task);
+        log::debug!("Started task: {}", task);
 
         if !silent {
             ternary!(
