@@ -48,8 +48,8 @@ pub fn task(values: &cli::Maidfile, value: &Value, path: &String, args: &Vec<Str
             for (key, value) in values.env.iter() {
                 let value_formatted = ternary!(
                     value.to_string().starts_with("\""),
-                    helpers::trim_start_end(helpers::string_to_static_str(Template::new_with_placeholder(&value.to_string(), "{", "}").fill_with_hashmap(&table))),
-                    helpers::string_to_static_str(Template::new_with_placeholder(&value.to_string(), "{", "}").fill_with_hashmap(&table))
+                    helpers::trim_start_end(helpers::string_to_static_str(Template::new_with_placeholder(&value.to_string(), "%{", "}").fill_with_hashmap(&table))),
+                    helpers::string_to_static_str(Template::new_with_placeholder(&value.to_string(), "%{", "}").fill_with_hashmap(&table))
                 );
 
                 env::set_var(key, value_formatted);
@@ -57,7 +57,7 @@ pub fn task(values: &cli::Maidfile, value: &Value, path: &String, args: &Vec<Str
                 table.insert(helpers::string_to_static_str(format!("env.{}", key.clone())), value_formatted);
             }
 
-            let script = Template::new_with_placeholder(string, "{", "}").fill_with_hashmap(&table);
+            let script = Template::new_with_placeholder(string, "%{", "}").fill_with_hashmap(&table);
             let (name, args) = match script.try_into_args() {
                 Ok(result) => {
                     let mut args = result.clone();
