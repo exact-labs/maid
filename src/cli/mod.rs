@@ -1,17 +1,17 @@
 use crate::helpers;
 use colored::Colorize;
 use just_macros::{crashln, ternary};
-use serde_derive::Deserialize;
+use serde_derive::{Deserialize, Serialize};
 use std::{collections::BTreeMap, env, time::Instant};
 use toml::Value;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Maidfile {
     pub env: BTreeMap<String, Value>,
     pub tasks: BTreeMap<String, Tasks>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Tasks {
     pub script: Value,
     pub path: String,
