@@ -5,7 +5,7 @@ pub fn value_error(debug_err: &str) {
     errorln!("Unable to parse maidfile. Does it contain non string values?");
 }
 
-pub fn toml_to_json<T: serde::Serialize>(values: T) -> String {
+pub fn struct_to_json<T: serde::Serialize>(values: T) -> String {
     match serde_json::to_string(&values) {
         Ok(contents) => contents,
         Err(err) => {

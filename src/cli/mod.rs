@@ -3,6 +3,7 @@ use colored::Colorize;
 use macros_rs::{crashln, errorln, ternary};
 use optional_field::{serde_optional_fields, Field};
 use serde_derive::{Deserialize, Serialize};
+use serde_json::json;
 use std::{collections::BTreeMap, collections::HashMap, env, time::Instant};
 use text_placeholder::Template;
 use toml::Value;
@@ -69,6 +70,8 @@ pub fn create_table(values: Maidfile, args: &Vec<String>) -> HashMap<&str, &str>
         log::info!("{} env.{key}: '{}'", helpers::string::add_icon(), value_formatted.yellow());
         table.insert(helpers::string::to_static_str(format!("env.{}", key.clone())), value_formatted);
     }
+
+    log::trace!("{}", json!({ "env": table }));
 
     return table;
 }

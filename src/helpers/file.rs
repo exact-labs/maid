@@ -1,5 +1,6 @@
 use crate::cli::Maidfile;
 use macros_rs::{crashln, fmtstr, then};
+use serde_json::json;
 use std::{env, fs, path::Path, path::PathBuf};
 
 #[derive(Debug)]
@@ -22,8 +23,8 @@ fn find_file(starting_directory: &Path, filename: &String) -> Option<PathBuf> {
     let find_kind = |kind: &str, mut inner: PathBuf| -> Filesystem {
         then!(working_dir() != starting_directory, inner.pop());
         inner.push(Path::new(fmtstr!("{filename}{kind}")));
+        log::trace!("{}", json!({"kind": kind, "path": inner}));
 
-        // println!("Finding path: {{\"kind\": \"{kind}\", \"path\":\"{}\"}}", inner.display());
         return Filesystem {
             path: Some(inner.clone()),
             is_file: inner.is_file(),
@@ -69,8 +70,18 @@ fn read_file(path: PathBuf, kind: &str, format: &str) -> Maidfile {
         }
     };
 
-    let read_yml = |contents: &String| -> Maidfile {
+    let read_yaml = |contents: &String| -> Maidfile {
         match serde_yaml::from_str(contents) {
+            Ok(contents) => contents,
+            Err(err) => {
+                log::warn!("{err}");
+                crashln!("Cannot read maidfile.");
+            }
+        }
+    };
+
+    let read_json = |contents: &String| -> Maidfile {
+        match serde_json::from_str(contents) {
             Ok(contents) => contents,
             Err(err) => {
                 log::warn!("{err}");
@@ -90,9 +101,9 @@ fn read_file(path: PathBuf, kind: &str, format: &str) -> Maidfile {
     };
 
     match kind {
-        "yaml" => read_yml(&contents),
-        "yml" => read_yml(&contents),
-        "json" => read_yml(&contents),
+        "yaml" => read_yaml(&contents),
+        "yml" => read_yaml(&contents),
+        "json" => read_json(&contents),
         "toml" => read_toml(&contents),
         _ => {
             crashln!("Cannot read maidfile.");

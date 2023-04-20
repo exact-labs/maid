@@ -343,9 +343,9 @@ dependencies = [
 
 [[package]]
 name = "macros-rs"
-version = "0.3.0"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "75dcdd9564a646c93505261b5318b46c72c532b65200e9ebd25c6e627018cae3"
+checksum = "36f8f994a185c625311101a9946b2faf1f125b0b5ff1d6fb9f9b9d4ae0d738ef"
 
 [[package]]
 name = "memchr"

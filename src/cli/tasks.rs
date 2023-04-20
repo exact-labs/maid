@@ -22,7 +22,7 @@ impl std::fmt::Display for Task {
 
 pub fn json(path: &String, args: &Vec<String>, hydrate: &bool) {
     let values = helpers::file::read_maidfile(path);
-    let json = helpers::toml_to_json(values.clone());
+    let json = helpers::struct_to_json(values.clone());
     let table = cli::create_table(values.clone(), args);
     let hydrated_json = Template::new_with_placeholder(&json, "%{", "}").fill_with_hashmap(&table);
 

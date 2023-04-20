@@ -2,6 +2,7 @@ use crate::cli;
 use crate::helpers;
 use crate::shell::IntoArgs;
 use macros_rs::crashln;
+use serde_json::json;
 use std::process::{Command, Stdio};
 use text_placeholder::Template;
 use toml::Value;
@@ -26,10 +27,9 @@ pub fn task(values: &cli::Maidfile, value: &Value, path: &String, args: &Vec<Str
 
             log::debug!("Original Script: {}", string);
             log::debug!("Parsed Script: {}", script);
-            log::trace!("Command name: {name}");
-            log::trace!("Command args: {:?}", args);
-
+            log::trace!("{}", json!({"name": name, "args": args}));
             log::info!("Execute Command: '{name} {}'", args.join(" "));
+
             let mut cmd = match Command::new(&name)
                 .args(args.clone())
                 .stdout(Stdio::inherit())
