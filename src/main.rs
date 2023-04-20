@@ -5,6 +5,8 @@ mod shell;
 use clap::{Parser, Subcommand};
 use clap_verbosity_flag::Verbosity;
 
+// add remote build server - dependencies required for builds (build requires clean etc)
+
 #[derive(Parser)]
 #[command(version)]
 struct Cli {
@@ -24,9 +26,10 @@ enum Commands {
     /// List all maidfile tasks
     Tasks,
     /// Return the maidfile in json
-    Json,
-    /// List all maidfile tasks in a hydrated json
-    Hydrate,
+    Json {
+        #[arg(long, default_value_t = false, help = "Hydrate json output with env")]
+        hydrate: bool,
+    },
 }
 
 fn main() {
@@ -34,8 +37,7 @@ fn main() {
     env_logger::Builder::new().filter_level(cli.verbose.log_level_filter()).init();
 
     match &cli.command {
-        Some(Commands::Json) => cli::tasks::json(&cli.path),
-        Some(Commands::Hydrate) => cli::tasks::hydrate(&cli.path),
+        Some(Commands::Json { hydrate }) => cli::tasks::json(&cli.path, &cli.task, hydrate),
         Some(Commands::Tasks) => cli::tasks::list(&cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),
         None => cli::exec(&cli.task[0], &cli.task, &cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),
     }

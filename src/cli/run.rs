@@ -1,62 +1,15 @@
 use crate::cli;
 use crate::helpers;
 use crate::shell::IntoArgs;
-use colored::Colorize;
-use just_macros::{crashln, errorln, ternary};
+use just_macros::crashln;
 use std::process::{Command, Stdio};
-use std::{collections::HashMap, env};
 use text_placeholder::Template;
 use toml::Value;
 
 pub fn task(values: &cli::Maidfile, value: &Value, path: &String, args: &Vec<String>) {
     match value {
         Value::String(string) => {
-            let mut table = HashMap::new();
-
-            table.insert("os.platform", env::consts::OS);
-            table.insert("os.arch", env::consts::ARCH);
-
-            log::info!("{} os.platform: '{}'", helpers::add_icon(), env::consts::OS.yellow());
-            log::info!("{} os.arch: '{}'", helpers::add_icon(), env::consts::ARCH.yellow());
-
-            match env::current_dir() {
-                Ok(path) => {
-                    table.insert("dir.current", helpers::path_to_str(&path));
-                    log::info!("{} dir.current: '{}'", helpers::add_icon(), helpers::path_to_str(&path).yellow());
-                }
-                Err(err) => {
-                    log::warn!("{err}");
-                    errorln!("Current directory could not be added as script variable.");
-                }
-            }
-
-            match home::home_dir() {
-                Some(path) => {
-                    table.insert("dir.home", helpers::path_to_str(&path));
-                    log::info!("{} dir.home: '{}'", helpers::add_icon(), helpers::path_to_str(&path).yellow());
-                }
-                None => {
-                    errorln!("Home directory could not be added as script variable.");
-                }
-            }
-
-            for (pos, arg) in args.iter().enumerate() {
-                log::info!("{} arg.{pos}: '{}'", helpers::add_icon(), arg.yellow());
-                table.insert(helpers::string_to_static_str(format!("arg.{pos}")), arg);
-            }
-
-            for (key, value) in values.env.iter() {
-                let value_formatted = ternary!(
-                    value.to_string().starts_with("\""),
-                    helpers::trim_start_end(helpers::string_to_static_str(Template::new_with_placeholder(&value.to_string(), "%{", "}").fill_with_hashmap(&table))),
-                    helpers::string_to_static_str(Template::new_with_placeholder(&value.to_string(), "%{", "}").fill_with_hashmap(&table))
-                );
-
-                env::set_var(key, value_formatted);
-                log::info!("{} env.{key}: '{}'", helpers::add_icon(), value_formatted.yellow());
-                table.insert(helpers::string_to_static_str(format!("env.{}", key.clone())), value_formatted);
-            }
-
+            let table = cli::create_table(values.clone(), args);
             let script = Template::new_with_placeholder(string, "%{", "}").fill_with_hashmap(&table);
             let (name, args) = match script.try_into_args() {
                 Ok(result) => {

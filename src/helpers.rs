@@ -1,3 +1,4 @@
+use crate::cli;
 use colored::{ColoredString, Colorize};
 use just_macros::{crashln, errorln};
 use std::{env, fs, path::Path, path::PathBuf};
@@ -62,6 +63,26 @@ pub fn read_maidfile(filename: &String) -> String {
         Err(err) => {
             log::warn!("{err}");
             crashln!("Home directory could not found.");
+        }
+    }
+}
+
+pub fn parse_maidfile(path: &String) -> cli::Maidfile {
+    match toml::from_str(&read_maidfile(path)) {
+        Ok(contents) => contents,
+        Err(err) => {
+            log::warn!("{err}");
+            crashln!("Cannot read maidfile.");
+        }
+    }
+}
+
+pub fn toml_to_json<T: serde::Serialize>(values: T) -> String {
+    match serde_json::to_string(&values) {
+        Ok(contents) => contents,
+        Err(err) => {
+            log::warn!("{err}");
+            crashln!("Cannot read maidfile.");
         }
     }
 }
