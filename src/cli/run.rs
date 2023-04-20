@@ -1,7 +1,7 @@
 use crate::cli;
 use crate::helpers;
 use crate::shell::IntoArgs;
-use just_macros::crashln;
+use macros_rs::crashln;
 use std::process::{Command, Stdio};
 use text_placeholder::Template;
 use toml::Value;

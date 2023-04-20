@@ -1,6 +1,6 @@
 use crate::helpers;
 use colored::Colorize;
-use just_macros::{crashln, errorln, ternary};
+use macros_rs::{crashln, errorln, ternary};
 use optional_field::{serde_optional_fields, Field};
 use serde_derive::{Deserialize, Serialize};
 use std::{collections::BTreeMap, collections::HashMap, env, time::Instant};

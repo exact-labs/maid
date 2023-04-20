@@ -192,8 +192,8 @@ dependencies = [
  "env_logger",
  "home",
  "inquire",
- "just_macros",
  "log",
+ "macros-rs",
  "optional-field",
  "serde",
  "serde_derive",
@@ -305,12 +305,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "453ad9f582a441959e5f0d088b02ce04cfe8d51a8eaf077f12ac6d3e94164ca6"
 
 [[package]]
-name = "just_macros"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d4841b37398fe892bae45b3fc1ebc812132f653cb2f284d739cf9105d4d1b999"
-
-[[package]]
 name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -346,6 +340,12 @@ checksum = "abb12e687cfb44aa40f41fc3978ef76448f9b6038cad6aef4259d3c095a2382e"
 dependencies = [
  "cfg-if",
 ]
+
+[[package]]
+name = "macros-rs"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75dcdd9564a646c93505261b5318b46c72c532b65200e9ebd25c6e627018cae3"
 
 [[package]]
 name = "memchr"

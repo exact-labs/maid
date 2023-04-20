@@ -1,4 +1,4 @@
-use just_macros::{crashln, errorln};
+use macros_rs::{crashln, errorln};
 
 pub fn value_error(debug_err: &str) {
     log::warn!("unexpected {debug_err} found");

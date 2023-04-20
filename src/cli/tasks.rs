@@ -2,7 +2,7 @@ use crate::cli;
 use crate::helpers;
 use colored::Colorize;
 use inquire::Select;
-use just_macros::{string, ternary};
+use macros_rs::{string, ternary};
 use optional_field::Field;
 use text_placeholder::Template;
 

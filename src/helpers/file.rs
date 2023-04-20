@@ -1,16 +1,58 @@
 use crate::cli::Maidfile;
-use just_macros::crashln;
+use macros_rs::{crashln, fmtstr, then};
 use std::{env, fs, path::Path, path::PathBuf};
 
+#[derive(Debug)]
+struct Filesystem {
+    path: Option<PathBuf>,
+    is_file: bool,
+}
+
+fn working_dir() -> PathBuf {
+    match env::current_dir() {
+        Ok(path) => path,
+        Err(_) => {
+            crashln!("Unable to find current working dir");
+        }
+    }
+}
+
 fn find_file(starting_directory: &Path, filename: &String) -> Option<PathBuf> {
-    let mut path: PathBuf = starting_directory.into();
-    let file = Path::new(filename);
+    let mut path: PathBuf = starting_directory.clone().into();
+    let find_kind = |kind: &str, mut inner: PathBuf| -> Filesystem {
+        then!(working_dir() != starting_directory, inner.pop());
+        inner.push(Path::new(fmtstr!("{filename}{kind}")));
+
+        // println!("Finding path: {{\"kind\": \"{kind}\", \"path\":\"{}\"}}", inner.display());
+        return Filesystem {
+            path: Some(inner.clone()),
+            is_file: inner.is_file(),
+        };
+    };
 
     loop {
-        path.push(file);
-        if path.is_file() {
-            break Some(path);
+        let default = find_kind("", path.clone());
+        let yaml = find_kind(".yaml", path.clone());
+        let yml = find_kind(".yml", path.clone());
+        let json = find_kind(".json", path.clone());
+        let toml = find_kind(".toml", path.clone());
+
+        if default.is_file {
+            break default.path;
         }
+        if yaml.is_file {
+            break yaml.path;
+        }
+        if yml.is_file {
+            break yml.path;
+        }
+        if json.is_file {
+            break json.path;
+        }
+        if toml.is_file {
+            break toml.path;
+        }
+
         if !(path.pop() && path.pop()) {
             break None;
         }
@@ -78,6 +120,7 @@ pub fn read_maidfile(filename: &String) -> Maidfile {
                     Some("yaml") => read_file(path, "yaml", ""),
                     Some("yml") => read_file(path, "yml", ""),
                     Some("json") => read_file(path, "json", ""),
+                    Some("toml") => read_file(path, "toml", "[env]\n"),
                     Some(_) => read_file(path, "toml", "[env]\n"),
                     None => read_file(path, "toml", "[env]\n"),
                 }
