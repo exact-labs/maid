@@ -18,6 +18,7 @@ pub struct Tasks {
     pub script: Value,
     pub path: Field<String>,
     pub info: Field<String>,
+    pub hide: Field<bool>,
 }
 
 pub fn exec(task: &String, args: &Vec<String>, path: &String, silent: bool, log_level: Option<log::Level>) {

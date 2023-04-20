@@ -5,7 +5,7 @@ TYPE = '%{dir.home} %{env.STRING} %{arg.1}'
 ARR = ['hello', 'world']
 VERSION='0.3.0'
 
-# hidden tasks
+# hidden tasks (can also hide with `hide = true`)
 [tasks._build_macos]
 script = [
 "cargo build --release", 

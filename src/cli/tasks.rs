@@ -2,10 +2,24 @@ use crate::cli;
 use crate::helpers;
 use colored::Colorize;
 use inquire::Select;
-use just_macros::{crashln, errorln, ternary};
+use just_macros::{crashln, errorln, string, ternary};
 use optional_field::Field;
-use std::{collections::HashMap, env, str::from_utf8};
+use std::{collections::HashMap, env};
 use text_placeholder::Template;
+
+#[derive(Debug)]
+struct Task {
+    name: String,
+    formatted: String,
+    hidden: bool,
+}
+
+impl std::fmt::Display for Task {
+    #[inline]
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(&self.formatted, f)
+    }
+}
 
 pub fn hydrate(path: &String) {
     let values: cli::Maidfile = match toml::from_str(&helpers::read_maidfile(path)) {
@@ -99,30 +113,43 @@ pub fn list(path: &String, silent: bool, log_level: Option<log::Level>) {
         }
     };
 
-    let mut options = values
+    let mut options: Vec<_> = values
         .tasks
         .iter()
         .map(|(key, task)| {
-            let task_info = match &task.info {
-                Field::Present(Some(info)) => format!(" ({})", info).white(),
-                Field::Present(None) => format!(" {}", "(no description)").bright_red(),
-                Field::Missing => format!(" {}", "(no description)").bright_red(),
+            let info = match &task.info {
+                Field::Present(Some(info)) => format!("({info})").white(),
+                Field::Present(None) => string!("(no description)").bright_red(),
+                Field::Missing => string!("(no description)").bright_red(),
             };
 
-            let verbose_task = ternary!(log_level.unwrap() == log::Level::Warn, format!(" {}", task.script).bright_blue(), String::from("").bright_blue());
-            let formatted_task = format!("{}{}{}", format!("{key}").bright_yellow(), task_info, verbose_task);
-            ternary!(key.starts_with("_"), String::from("removed_item"), formatted_task)
-        })
-        .collect::<Vec<_>>();
+            let verbose = match log_level.unwrap() {
+                log::Level::Error => string!(),
+                _ => string!(task.script),
+            };
 
-    options.retain(|x| x != "removed_item");
+            let hidden = match key.starts_with("_") {
+                true => true,
+                false => match task.hide {
+                    Field::Present(Some(val)) => val,
+                    Field::Present(None) => false,
+                    Field::Missing => false,
+                },
+            };
+
+            return Task {
+                name: key.clone(),
+                formatted: format!("{} {} {}", format!("{key}").bright_yellow(), info, verbose.bright_blue()),
+                hidden: hidden.clone(),
+            };
+        })
+        .collect();
+
+    options.retain(|key| key.hidden == false);
     match Select::new("Select a task to run:", options).prompt() {
         Ok(task) => {
-            let key = &strip_ansi_escapes::strip(&task.split(" ").collect::<Vec<&str>>()[0]).unwrap();
-            let name = from_utf8(key).unwrap();
-
-            log::debug!("Starting {name}");
-            cli::exec(&String::from(name), &vec![String::from("")], &path, silent, log_level);
+            log::debug!("Starting {}", task.name);
+            cli::exec(&String::from(task.name), &vec![String::from("")], &path, silent, log_level);
         }
         Err(_) => println!("{}", "Aborting...".white()),
     }

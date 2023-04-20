@@ -282,9 +282,9 @@ checksum = "453ad9f582a441959e5f0d088b02ce04cfe8d51a8eaf077f12ac6d3e94164ca6"
 
 [[package]]
 name = "just_macros"
-version = "0.1.2"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "948a18b10c59a1c9bfb647f9a34b1977c226c7e8703469f59a797b20847e4ba2"
+checksum = "d4841b37398fe892bae45b3fc1ebc812132f653cb2f284d739cf9105d4d1b999"
 
 [[package]]
 name = "lazy_static"
