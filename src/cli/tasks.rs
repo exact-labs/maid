@@ -21,7 +21,7 @@ impl std::fmt::Display for Task {
 }
 
 pub fn json(path: &String, args: &Vec<String>, hydrate: &bool) {
-    let values = helpers::parse_maidfile(path);
+    let values = helpers::file::read_maidfile(path);
     let json = helpers::toml_to_json(values.clone());
     let table = cli::create_table(values.clone(), args);
     let hydrated_json = Template::new_with_placeholder(&json, "%{", "}").fill_with_hashmap(&table);
@@ -30,7 +30,7 @@ pub fn json(path: &String, args: &Vec<String>, hydrate: &bool) {
 }
 
 pub fn list(path: &String, silent: bool, log_level: Option<log::Level>) {
-    let values = helpers::parse_maidfile(path);
+    let values = helpers::file::read_maidfile(path);
     let mut options: Vec<_> = values
         .tasks
         .iter()

@@ -20,6 +20,7 @@ pub struct Tasks {
     pub path: Field<String>,
     pub info: Field<String>,
     pub hide: Field<bool>,
+    pub depends: Field<Value>,
 }
 
 pub fn create_table(values: Maidfile, args: &Vec<String>) -> HashMap<&str, &str> {
@@ -28,13 +29,13 @@ pub fn create_table(values: Maidfile, args: &Vec<String>) -> HashMap<&str, &str>
     table.insert("os.platform", env::consts::OS);
     table.insert("os.arch", env::consts::ARCH);
 
-    log::info!("{} os.platform: '{}'", helpers::add_icon(), env::consts::OS.yellow());
-    log::info!("{} os.arch: '{}'", helpers::add_icon(), env::consts::ARCH.yellow());
+    log::info!("{} os.platform: '{}'", helpers::string::add_icon(), env::consts::OS.yellow());
+    log::info!("{} os.arch: '{}'", helpers::string::add_icon(), env::consts::ARCH.yellow());
 
     match env::current_dir() {
         Ok(path) => {
-            table.insert("dir.current", helpers::path_to_str(&path));
-            log::info!("{} dir.current: '{}'", helpers::add_icon(), helpers::path_to_str(&path).yellow());
+            table.insert("dir.current", helpers::string::path_to_str(&path));
+            log::info!("{} dir.current: '{}'", helpers::string::add_icon(), helpers::string::path_to_str(&path).yellow());
         }
         Err(err) => {
             log::warn!("{err}");
@@ -44,8 +45,8 @@ pub fn create_table(values: Maidfile, args: &Vec<String>) -> HashMap<&str, &str>
 
     match home::home_dir() {
         Some(path) => {
-            table.insert("dir.home", helpers::path_to_str(&path));
-            log::info!("{} dir.home: '{}'", helpers::add_icon(), helpers::path_to_str(&path).yellow());
+            table.insert("dir.home", helpers::string::path_to_str(&path));
+            log::info!("{} dir.home: '{}'", helpers::string::add_icon(), helpers::string::path_to_str(&path).yellow());
         }
         None => {
             errorln!("Home directory could not be added as script variable.");
@@ -53,20 +54,20 @@ pub fn create_table(values: Maidfile, args: &Vec<String>) -> HashMap<&str, &str>
     }
 
     for (pos, arg) in args.iter().enumerate() {
-        log::info!("{} arg.{pos}: '{}'", helpers::add_icon(), arg.yellow());
-        table.insert(helpers::string_to_static_str(format!("arg.{pos}")), arg);
+        log::info!("{} arg.{pos}: '{}'", helpers::string::add_icon(), arg.yellow());
+        table.insert(helpers::string::to_static_str(format!("arg.{pos}")), arg);
     }
 
     for (key, value) in values.env.iter() {
         let value_formatted = ternary!(
             value.to_string().starts_with("\""),
-            helpers::trim_start_end(helpers::string_to_static_str(Template::new_with_placeholder(&value.to_string(), "%{", "}").fill_with_hashmap(&table))),
-            helpers::string_to_static_str(Template::new_with_placeholder(&value.to_string(), "%{", "}").fill_with_hashmap(&table))
+            helpers::string::trim_start_end(helpers::string::to_static_str(Template::new_with_placeholder(&value.to_string(), "%{", "}").fill_with_hashmap(&table))),
+            helpers::string::to_static_str(Template::new_with_placeholder(&value.to_string(), "%{", "}").fill_with_hashmap(&table))
         );
 
         env::set_var(key, value_formatted);
-        log::info!("{} env.{key}: '{}'", helpers::add_icon(), value_formatted.yellow());
-        table.insert(helpers::string_to_static_str(format!("env.{}", key.clone())), value_formatted);
+        log::info!("{} env.{key}: '{}'", helpers::string::add_icon(), value_formatted.yellow());
+        table.insert(helpers::string::to_static_str(format!("env.{}", key.clone())), value_formatted);
     }
 
     return table;
@@ -78,15 +79,8 @@ pub fn exec(task: &String, args: &Vec<String>, path: &String, silent: bool, log_
         tasks::list(path, silent, log_level)
     } else {
         let start = Instant::now();
-        let cwd = &helpers::get_current_working_dir();
-
-        let values: Maidfile = match toml::from_str(&helpers::read_maidfile(path)) {
-            Ok(contents) => contents,
-            Err(err) => {
-                log::warn!("{err}");
-                crashln!("Cannot read maidfile.");
-            }
-        };
+        let cwd = &helpers::file::get_current_working_dir();
+        let values = &helpers::file::read_maidfile(path);
 
         if values.tasks.get(task).is_none() {
             crashln!("Maid could not find the task '{task}'. Does it exist?");
