@@ -177,7 +177,7 @@ dependencies = [
 
 [[package]]
 name = "exact-maid"
-version = "0.4.1"
+version = "0.5.0"
 dependencies = [
  "clap",
  "clap-verbosity-flag",
@@ -187,6 +187,7 @@ dependencies = [
  "inquire",
  "just_macros",
  "log",
+ "optional-field",
  "serde",
  "serde_derive",
  "serde_json",
@@ -356,6 +357,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6f61fba1741ea2b3d6a1e3178721804bb716a68a6aeba1149b5d52e3d464ea66"
 
 [[package]]
+name = "optional-field"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "59467f96f81e21832b9c288499c5830f4f97fcab785b33ca3dbb8346db517027"
+dependencies = [
+ "optional-fields-serde-macro",
+ "serde",
+]
+
+[[package]]
+name = "optional-fields-serde-macro"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d31df4973a2272faf744696144d1d0b2614481f1f4a0dbfead454b2e5d9f0a8f"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "os_str_bytes"
 version = "6.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -483,6 +505,9 @@ name = "serde"
 version = "1.0.152"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bb7d1f0d3021d347a83e556fc4683dea2ea09d87bccdf88ff5c12545d89d5efb"
+dependencies = [
+ "serde_derive",
+]
 
 [[package]]
 name = "serde_derive"

@@ -1,6 +1,7 @@
 use crate::helpers;
 use colored::Colorize;
 use just_macros::{crashln, ternary};
+use optional_field::{serde_optional_fields, Field};
 use serde_derive::{Deserialize, Serialize};
 use std::{collections::BTreeMap, env, time::Instant};
 use toml::Value;
@@ -11,11 +12,12 @@ pub struct Maidfile {
     pub tasks: BTreeMap<String, Tasks>,
 }
 
+#[serde_optional_fields]
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Tasks {
     pub script: Value,
-    pub path: String,
-    pub info: String,
+    pub path: Field<String>,
+    pub info: Field<String>,
 }
 
 pub fn exec(task: &String, args: &Vec<String>, path: &String, silent: bool, log_level: Option<log::Level>) {
@@ -24,6 +26,8 @@ pub fn exec(task: &String, args: &Vec<String>, path: &String, silent: bool, log_
         tasks::list(path, silent, log_level)
     } else {
         let start = Instant::now();
+        let cwd = &helpers::get_current_working_dir();
+
         let values: Maidfile = match toml::from_str(&helpers::read_maidfile(path)) {
             Ok(contents) => contents,
             Err(err) => {
@@ -36,10 +40,14 @@ pub fn exec(task: &String, args: &Vec<String>, path: &String, silent: bool, log_
             crashln!("Maid could not find the task '{task}'. Does it exist?");
         }
 
-        let cwd = &String::from(env::current_dir().unwrap().to_string_lossy());
-        log::debug!("Working dir: {}", cwd);
+        let task_path = match &values.tasks[task].path {
+            Field::Present(Some(path)) => ternary!(path == "", cwd, path),
+            Field::Present(None) => cwd,
+            Field::Missing => cwd,
+        };
 
-        let task_path = ternary!(&values.tasks[task].path != "", &values.tasks[task].path, cwd);
+        log::debug!("Task path: {}", task_path);
+        log::debug!("Working dir: {}", cwd);
         log::debug!("Started task: {}", task);
 
         if !silent {

@@ -1,6 +1,6 @@
 [package]
 name = "exact-maid"
-version = "0.4.1"
+version = "0.5.0"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/exact-rs/maid"
@@ -23,3 +23,4 @@ strip-ansi-escapes = "0.1.1"
 clap-verbosity-flag = "2.0.0"
 clap = { version = "4.1.1", features = ["derive"] }
 serde_json = "1.0.96"
+optional-field = "0.1.3"

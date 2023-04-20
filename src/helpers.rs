@@ -34,6 +34,15 @@ pub fn value_error(debug_err: &str) {
     errorln!("Unable to parse maidfile. Does it contain non string values?");
 }
 
+pub fn get_current_working_dir() -> String {
+    match env::current_dir() {
+        Ok(path) => path.into_os_string().into_string().unwrap(),
+        Err(_) => {
+            crashln!("Unable to find current working dir");
+        }
+    }
+}
+
 pub fn read_maidfile(filename: &String) -> String {
     match env::current_dir() {
         Ok(path) => match find_file(&path, &filename) {
