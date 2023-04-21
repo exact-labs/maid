@@ -7,7 +7,6 @@ repository = "https://github.com/exact-rs/maid"
 description = "🔨 An easy to use make alternative."
 
 [dependencies]
-
 log = "0.4.17"
 home = "0.5.4"
 toml = "0.5.11"

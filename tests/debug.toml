@@ -1,0 +1,18 @@
+import = ["tests/test.yml"]
+
+[env]
+STRING = "hello world"
+
+[project]
+name = "debug"
+version = "0.0.1"
+
+[project.server]
+address = "localhost:3000"
+docker = false
+token = "ZWZ0Z3loZHVpandzZGhneXVpb2w="
+pull = ["something", "another"]
+
+[tasks.test]
+script = "echo %{env.STRING}"
+depends = "echo hi"

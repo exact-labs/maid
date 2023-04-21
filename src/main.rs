@@ -23,8 +23,21 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    /// All internal maid commands
+    Butler {
+        #[command(subcommand)]
+        internal: Butler,
+    },
+}
+
+#[derive(Subcommand)]
+enum Butler {
     /// List all maidfile tasks
     Tasks,
+    /// Get Project Info
+    Info,
+    /// Test server specified in makefile
+    Connect,
     /// Return the maidfile in json
     Json {
         #[arg(long, default_value_t = false, help = "Hydrate json output with env")]
@@ -37,8 +50,12 @@ fn main() {
     env_logger::Builder::new().filter_level(cli.verbose.log_level_filter()).init();
 
     match &cli.command {
-        Some(Commands::Json { hydrate }) => cli::tasks::json(&cli.path, &cli.task, hydrate),
-        Some(Commands::Tasks) => cli::tasks::list(&cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),
+        Some(Commands::Butler { internal }) => match internal {
+            Butler::Json { hydrate } => cli::tasks::json(&cli.path, &cli.task, hydrate),
+            Butler::Info => println!("info"),
+            Butler::Connect => println!("test server here"),
+            Butler::Tasks => cli::tasks::list(&cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),
+        },
         None => cli::exec(&cli.task[0], &cli.task, &cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),
     }
 }

@@ -1,7 +1,7 @@
 use crate::helpers;
 use colored::Colorize;
 use macros_rs::{crashln, errorln, ternary};
-use optional_field::{serde_optional_fields, Field};
+use optional_field::Field;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::json;
 use std::{collections::BTreeMap, collections::HashMap, env, time::Instant};
@@ -10,18 +10,39 @@ use toml::Value;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Maidfile {
+    pub import: Field<Value>,
     pub env: BTreeMap<String, Value>,
+    pub project: Field<Project>,
     pub tasks: BTreeMap<String, Tasks>,
 }
 
-#[serde_optional_fields]
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Project {
+    pub name: Field<String>,
+    pub version: Field<String>,
+    pub server: Field<Server>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Server {
+    pub address: String,
+    pub docker: Field<bool>,
+    pub token: Field<String>,
+    pub pull: Field<Value>,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Tasks {
     pub script: Value,
     pub path: Field<String>,
     pub info: Field<String>,
+    pub target: Field<String>,
+    pub retry: Field<i64>,
     pub hide: Field<bool>,
     pub depends: Field<Value>,
+    pub dependencies: Field<Value>,
+    pub worker: Field<bool>,
+    pub cache: Field<bool>,
 }
 
 pub fn create_table(values: Maidfile, args: &Vec<String>) -> HashMap<&str, &str> {

@@ -60,10 +60,10 @@ fn find_file(starting_directory: &Path, filename: &String) -> Option<PathBuf> {
     }
 }
 
-fn read_file(path: PathBuf, kind: &str, format: &str) -> Maidfile {
+fn read_file(path: PathBuf, kind: &str) -> Maidfile {
     log::debug!("Maidfile is {kind}");
     let contents = match fs::read_to_string(path) {
-        Ok(contents) => format!("{format}{contents}"),
+        Ok(contents) => contents,
         Err(err) => {
             log::warn!("{err}");
             crashln!("Cannot find maidfile. Does it exist?");
@@ -128,12 +128,12 @@ pub fn read_maidfile(filename: &String) -> Maidfile {
 
                 let extension = path.extension().and_then(|s| s.to_str());
                 match extension {
-                    Some("yaml") => read_file(path, "yaml", ""),
-                    Some("yml") => read_file(path, "yml", ""),
-                    Some("json") => read_file(path, "json", ""),
-                    Some("toml") => read_file(path, "toml", "[env]\n"),
-                    Some(_) => read_file(path, "toml", "[env]\n"),
-                    None => read_file(path, "toml", "[env]\n"),
+                    Some("yaml") => read_file(path, "yaml"),
+                    Some("yml") => read_file(path, "yml"),
+                    Some("json") => read_file(path, "json"),
+                    Some("toml") => read_file(path, "toml"),
+                    Some(_) => read_file(path, "toml"),
+                    None => read_file(path, "toml"),
                 }
             }
             None => {
