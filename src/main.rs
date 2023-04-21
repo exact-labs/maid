@@ -36,7 +36,7 @@ enum Butler {
     Tasks,
     /// Get Project Info
     Info,
-    /// Test server specified in makefile
+    /// Test server specified in maidfile
     Connect,
     /// Clear maid cache
     Clean,
@@ -54,7 +54,7 @@ fn main() {
     match &cli.command {
         Some(Commands::Butler { internal }) => match internal {
             Butler::Json { hydrate } => cli::tasks::json(&cli.path, &cli.task, hydrate),
-            Butler::Info => println!("info"),
+            Butler::Info => cli::info(&cli.path),
             Butler::Connect => println!("test server here"),
             Butler::Clean => println!("delete maid cache"),
             Butler::Tasks => cli::tasks::list(&cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),

@@ -1,6 +1,6 @@
 use crate::helpers;
 use colored::Colorize;
-use macros_rs::{crashln, errorln, ternary};
+use macros_rs::{crashln, errorln, string, ternary};
 use merge_struct::merge;
 use optional_field::Field;
 use serde_derive::{Deserialize, Serialize};
@@ -55,6 +55,46 @@ pub struct Remote {
     pub pull: Field<Value>,
     pub worker: Field<String>,
     pub dependencies: Field<Value>,
+}
+
+pub fn info(path: &String) {
+    let values = read_maidfile_merge(path);
+
+    let name = match &values.project {
+        Field::Present(Some(project)) => project.name.clone().unwrap(),
+        Field::Present(None) => string!("none"),
+        Field::Missing => string!("none"),
+    };
+
+    let version = match &values.project {
+        Field::Present(Some(project)) => project.version.clone().unwrap(),
+        Field::Present(None) => string!("none"),
+        Field::Missing => string!("none"),
+    };
+
+    println!(
+        "{}\n{}\n{}",
+        "Project Info".green().bold(),
+        format!(" {}: {}", "- Name".white(), name.bright_yellow()),
+        format!(" {}: {}", "- Version".white(), version.bright_yellow())
+    );
+}
+
+pub fn read_maidfile_merge(path: &String) -> Maidfile {
+    let mut values = helpers::file::read_maidfile(path);
+    let imported_values = import::tasks(values.import.clone());
+
+    for import in imported_values.iter() {
+        values = match merge(&values, &import) {
+            Ok(merge) => merge,
+            Err(err) => {
+                log::warn!("{err}");
+                crashln!("Unable to import tasks.");
+            }
+        };
+    }
+
+    return values;
 }
 
 pub fn create_table(values: Maidfile, args: &Vec<String>) -> HashMap<&str, &str> {
@@ -115,19 +155,8 @@ pub fn exec(task: &String, args: &Vec<String>, path: &String, silent: bool, log_
         tasks::list(path, silent, log_level)
     } else {
         let start = Instant::now();
+        let values = read_maidfile_merge(path);
         let cwd = &helpers::file::get_current_working_dir();
-        let mut values = helpers::file::read_maidfile(path);
-        let imported_values = import::tasks(values.import.clone());
-
-        for import in imported_values.iter() {
-            values = match merge(&values, &import) {
-                Ok(merge) => merge,
-                Err(err) => {
-                    log::warn!("{err}");
-                    crashln!("Unable to import tasks.");
-                }
-            };
-        }
 
         if values.tasks.get(task).is_none() {
             crashln!("Maid could not find the task '{task}'. Does it exist?");
