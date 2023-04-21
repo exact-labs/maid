@@ -38,6 +38,8 @@ enum Butler {
     Info,
     /// Test server specified in makefile
     Connect,
+    /// Clear maid cache
+    Clean,
     /// Return the maidfile in json
     Json {
         #[arg(long, default_value_t = false, help = "Hydrate json output with env")]
@@ -54,6 +56,7 @@ fn main() {
             Butler::Json { hydrate } => cli::tasks::json(&cli.path, &cli.task, hydrate),
             Butler::Info => println!("info"),
             Butler::Connect => println!("test server here"),
+            Butler::Clean => println!("delete maid cache"),
             Butler::Tasks => cli::tasks::list(&cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),
         },
         None => cli::exec(&cli.task[0], &cli.task, &cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),

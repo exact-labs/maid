@@ -25,24 +25,35 @@ pub struct Project {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Server {
-    pub address: String,
-    pub docker: Field<bool>,
+    pub address: Address,
     pub token: Field<String>,
-    pub pull: Field<Value>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Tasks {
     pub script: Value,
-    pub path: Field<String>,
-    pub info: Field<String>,
-    pub target: Field<String>,
     pub retry: Field<i64>,
     pub hide: Field<bool>,
-    pub depends: Field<Value>,
-    pub dependencies: Field<Value>,
-    pub worker: Field<bool>,
     pub cache: Field<bool>,
+    pub path: Field<String>,
+    pub info: Field<String>,
+    pub target: Field<Value>,
+    pub remote: Field<Remote>,
+    pub depends: Field<Value>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Address {
+    pub ip: Field<String>,
+    pub port: Field<i64>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Remote {
+    pub push: Field<Value>,
+    pub pull: Field<Value>,
+    pub worker: Field<String>,
+    pub dependencies: Field<Value>,
 }
 
 pub fn create_table(values: Maidfile, args: &Vec<String>) -> HashMap<&str, &str> {
