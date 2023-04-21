@@ -1,4 +1,4 @@
-import = "import.toml"
+import = ["tests/import.toml", "tests/import.yml"]
 
 [env]
 STRING = "hello world"
@@ -13,5 +13,5 @@ token = "ZWZ0Z3loZHVpandzZGhneXVpb2w="
 
 [tasks.test]
 script = "echo %{env.STRING}"
-depends = "echo hi"
+depends = "other"
 remote = {push = ["src", "cargo.toml"], pull = "maid", dependencies = "rust"}

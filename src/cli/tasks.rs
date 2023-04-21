@@ -2,7 +2,8 @@ use crate::cli;
 use crate::helpers;
 use colored::Colorize;
 use inquire::Select;
-use macros_rs::{string, ternary};
+use macros_rs::{crashln, string, ternary};
+use merge_struct::merge;
 use optional_field::Field;
 use text_placeholder::Template;
 
@@ -21,7 +22,19 @@ impl std::fmt::Display for Task {
 }
 
 pub fn json(path: &String, args: &Vec<String>, hydrate: &bool) {
-    let values = helpers::file::read_maidfile(path);
+    let mut values = helpers::file::read_maidfile(path);
+    let imported_values = cli::import::tasks(values.import.clone());
+
+    for import in imported_values.iter() {
+        values = match merge(&values, &import) {
+            Ok(merge) => merge,
+            Err(err) => {
+                log::warn!("{err}");
+                crashln!("Unable to import tasks.");
+            }
+        };
+    }
+
     let json = helpers::struct_to_json(values.clone());
     let table = cli::create_table(values.clone(), args);
     let hydrated_json = Template::new_with_placeholder(&json, "%{", "}").fill_with_hashmap(&table);

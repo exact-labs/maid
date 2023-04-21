@@ -1,17 +1,5 @@
-import = ["tests/test.yml"]
-
 [env]
-STRING = "hello world"
+OTHER = "other world"
 
-[project]
-name = "debug"
-version = "0.0.1"
-
-[project.server]
-address = {ip = "localhost", port = 3000 }
-token = "ZWZ0Z3loZHVpandzZGhneXVpb2w="
-
-[tasks.test]
-script = "echo %{env.STRING}"
-depends = "echo hi"
-remote = {push = ["src", "cargo.toml"], pull = "maid", dependencies = "rust"}
+[tasks.other]
+script = "echo %{env.OTHER}"

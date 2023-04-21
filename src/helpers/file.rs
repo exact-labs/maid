@@ -120,7 +120,7 @@ pub fn get_current_working_dir() -> String {
     }
 }
 
-pub fn read_maidfile(filename: &String) -> Maidfile {
+pub fn read_maidfile_with_error(filename: &String, error: &str) -> Maidfile {
     match env::current_dir() {
         Ok(path) => match find_file(&path, &filename) {
             Some(path) => {
@@ -137,7 +137,8 @@ pub fn read_maidfile(filename: &String) -> Maidfile {
                 }
             }
             None => {
-                crashln!("Cannot find maidfile. Does it exist?");
+                log::warn!("{error}");
+                crashln!("{error}");
             }
         },
         Err(err) => {
@@ -145,4 +146,8 @@ pub fn read_maidfile(filename: &String) -> Maidfile {
             crashln!("Home directory could not found.");
         }
     }
+}
+
+pub fn read_maidfile(filename: &String) -> Maidfile {
+    read_maidfile_with_error(filename, "Cannot find maidfile. Does it exist?")
 }

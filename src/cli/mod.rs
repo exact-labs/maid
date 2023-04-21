@@ -1,6 +1,7 @@
 use crate::helpers;
 use colored::Colorize;
 use macros_rs::{crashln, errorln, ternary};
+use merge_struct::merge;
 use optional_field::Field;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::json;
@@ -10,7 +11,7 @@ use toml::Value;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Maidfile {
-    pub import: Field<Value>,
+    pub import: Field<Vec<String>>,
     pub env: BTreeMap<String, Value>,
     pub project: Field<Project>,
     pub tasks: BTreeMap<String, Tasks>,
@@ -115,7 +116,18 @@ pub fn exec(task: &String, args: &Vec<String>, path: &String, silent: bool, log_
     } else {
         let start = Instant::now();
         let cwd = &helpers::file::get_current_working_dir();
-        let values = &helpers::file::read_maidfile(path);
+        let mut values = helpers::file::read_maidfile(path);
+        let imported_values = import::tasks(values.import.clone());
+
+        for import in imported_values.iter() {
+            values = match merge(&values, &import) {
+                Ok(merge) => merge,
+                Err(err) => {
+                    log::warn!("{err}");
+                    crashln!("Unable to import tasks.");
+                }
+            };
+        }
 
         if values.tasks.get(task).is_none() {
             crashln!("Maid could not find the task '{task}'. Does it exist?");
@@ -146,5 +158,6 @@ pub fn exec(task: &String, args: &Vec<String>, path: &String, silent: bool, log_
     }
 }
 
+pub mod import;
 pub mod run;
 pub mod tasks;
