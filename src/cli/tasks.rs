@@ -49,7 +49,7 @@ pub fn list(path: &String, silent: bool, log_level: Option<log::Level>) {
         .iter()
         .map(|(key, task)| {
             let info = match &task.info {
-                Field::Present(Some(info)) => format!("({info})").white(),
+                Field::Present(Some(info)) => ternary!(info.trim().len() < 1, string!("(no description)").bright_red(), format!("({info})").white()),
                 Field::Present(None) => string!("(no description)").bright_red(),
                 Field::Missing => string!("(no description)").bright_red(),
             };

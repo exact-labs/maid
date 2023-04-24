@@ -12,7 +12,7 @@ use toml::Value;
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Maidfile {
     pub import: Field<Vec<String>>,
-    pub env: BTreeMap<String, Value>,
+    pub env: Field<BTreeMap<String, Value>>,
     pub project: Field<Project>,
     pub tasks: BTreeMap<String, Tasks>,
 }
@@ -99,6 +99,7 @@ pub fn read_maidfile_merge(path: &String) -> Maidfile {
 
 pub fn create_table(values: Maidfile, args: &Vec<String>) -> HashMap<&str, &str> {
     let mut table = HashMap::new();
+    let empty_env: BTreeMap<String, Value> = BTreeMap::new();
 
     table.insert("os.platform", env::consts::OS);
     table.insert("os.arch", env::consts::ARCH);
@@ -132,7 +133,13 @@ pub fn create_table(values: Maidfile, args: &Vec<String>) -> HashMap<&str, &str>
         table.insert(helpers::string::to_static_str(format!("arg.{pos}")), arg);
     }
 
-    for (key, value) in values.env.iter() {
+    let user_env = match &values.env {
+        Field::Present(Some(env)) => env.iter(),
+        Field::Present(None) => empty_env.iter(),
+        Field::Missing => empty_env.iter(),
+    };
+
+    for (key, value) in user_env {
         let value_formatted = ternary!(
             value.to_string().starts_with("\""),
             helpers::string::trim_start_end(helpers::string::to_static_str(Template::new_with_placeholder(&value.to_string(), "%{", "}").fill_with_hashmap(&table))),
