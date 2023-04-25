@@ -1,5 +1,4 @@
 use crate::cli;
-use crate::helpers;
 use crate::parse;
 use crate::structs;
 use crate::table;
@@ -11,7 +10,7 @@ use merge_struct::merge;
 use text_placeholder::Template;
 
 pub fn json(path: &String, args: &Vec<String>, hydrate: &bool) {
-    let mut values = helpers::file::read_maidfile(path);
+    let mut values = parse::file::read_maidfile(path);
     let imported_values = parse::import::push(values.import.clone());
 
     for import in imported_values.iter() {
@@ -32,7 +31,7 @@ pub fn json(path: &String, args: &Vec<String>, hydrate: &bool) {
 }
 
 pub fn list(path: &String, silent: bool, log_level: Option<log::Level>) {
-    let values = helpers::file::read_maidfile(path);
+    let values = parse::file::read_maidfile(path);
     let mut options: Vec<_> = values
         .tasks
         .iter()

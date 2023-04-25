@@ -1,11 +1,10 @@
-use crate::helpers;
 use crate::parse;
 use crate::structs::{DisplayTask, Maidfile};
 
 use macros_rs::crashln;
 
 pub fn merge(path: &String) -> Maidfile {
-    let mut values = helpers::file::read_maidfile(path);
+    let mut values = parse::file::read_maidfile(path);
     let imported_values = parse::import::push(values.import.clone());
 
     for import in imported_values.iter() {

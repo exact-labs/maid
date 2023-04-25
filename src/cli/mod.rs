@@ -1,4 +1,5 @@
 use crate::helpers;
+use crate::parse;
 use crate::structs::Task;
 
 use colored::Colorize;
@@ -39,7 +40,7 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, log_lev
         tasks::list(path, silent, log_level)
     } else {
         let values = helpers::maidfile::merge(path);
-        let cwd = &helpers::file::get_current_working_dir();
+        let cwd = &parse::file::get_current_working_dir();
 
         if values.tasks.get(task).is_none() {
             crashln!("Maid could not find the task '{task}'. Does it exist?");
