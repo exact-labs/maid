@@ -1,0 +1,8 @@
+[package]
+name = "exit_test"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "exit using specified code (arg 1)"
+
+[dependencies]
