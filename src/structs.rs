@@ -29,12 +29,23 @@ pub struct Tasks {
     pub script: Value,
     pub retry: Option<i32>,
     pub hide: Option<bool>,
-    pub cache: Option<bool>,
     pub path: Option<String>,
     pub info: Option<String>,
-    pub target: Option<Value>,
+    pub cache: Option<Cache>,
     pub remote: Option<Remote>,
     pub depends: Option<Value>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Cache {
+    pub path: String,
+    pub target: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct CacheConfig {
+    pub target: String,
+    pub hash: String,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]

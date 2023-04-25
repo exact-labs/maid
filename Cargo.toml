@@ -29,3 +29,7 @@ text_placeholder = "0.4.0"
 strip-ansi-escapes = "0.1.1"
 clap-verbosity-flag = "2.0.0"
 clap = { version = "4.1.1", features = ["derive"] }
+notify = "5.1.0"
+notify-debouncer-mini = "0.2.1"
+merkle_hash = "3.5.0"
+data-encoding = "2.3.3"

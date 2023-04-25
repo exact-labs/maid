@@ -35,7 +35,7 @@ script = [
 [tasks]
 # build tasks
 clean = { info = "remove binary", script = "rm maid" }
-build = { info = "build maid", script = ["cargo build --release", "mv target/release/exact-maid maid"] }
+build = { cache = { path = "src", target = "maid" }, info = "build maid", script = ["cargo build --release", "mv target/release/exact-maid maid"] }
 crates = { path="crates/server", info = "build maid crates", script = ["cargo build --release", "mv target/release/maid_server ."] }
 buildall = { info = "build all", script = ["rm -rf build", "mkdir build", "maid _build_macos", "maid _build_linux", "maid _build_windows"] }
 

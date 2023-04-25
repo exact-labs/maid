@@ -111,15 +111,6 @@ fn read_file(path: PathBuf, kind: &str) -> Maidfile {
     }
 }
 
-pub fn get_current_working_dir() -> String {
-    match env::current_dir() {
-        Ok(path) => path.into_os_string().into_string().unwrap(),
-        Err(_) => {
-            crashln!("Unable to find current working dir");
-        }
-    }
-}
-
 pub fn read_maidfile_with_error(filename: &String, error: &str) -> Maidfile {
     match env::current_dir() {
         Ok(path) => match find_file(&path, &filename) {

@@ -4,9 +4,11 @@ mod parse;
 mod shell;
 mod structs;
 mod table;
+mod task;
 
 use clap::{Parser, Subcommand};
 use clap_verbosity_flag::Verbosity;
+use std::path::Path;
 
 // add remote build server - dependencies required for builds (build requires clean etc)
 
@@ -43,6 +45,8 @@ enum Butler {
     Connect,
     /// Clear maid cache
     Clean,
+    /// Watch maidfile task
+    Watch,
     /// Return the maidfile in json
     Json {
         #[arg(long, default_value_t = false, help = "Hydrate json output with env")]
@@ -60,6 +64,7 @@ fn main() {
             Butler::Info => cli::info(&cli.path),
             Butler::Connect => println!("test server here"),
             Butler::Clean => println!("delete maid cache"),
+            Butler::Watch => cli::butler::watch(Path::new("src")),
             Butler::Tasks => cli::tasks::list(&cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),
         },
         None => cli::exec(cli.task[0].trim(), &cli.task, &cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),

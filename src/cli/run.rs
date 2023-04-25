@@ -1,11 +1,11 @@
 use crate::cli;
 use crate::helpers;
 use crate::shell::IntoArgs;
-use crate::structs::Runner;
+use crate::structs::{Cache, Runner};
 use crate::table;
 
 use colored::Colorize;
-use macros_rs::{crashln, inc};
+use macros_rs::{crashln, inc, string};
 use serde_json::json;
 use std::io::Error;
 use std::process::{Command, ExitStatus, Stdio};
@@ -92,6 +92,14 @@ fn run_script(runner: Runner, mut retry_times: i32) {
         None => crashln!("Failed to fetch final status code."),
     };
 
+    let cache = match &runner.maidfile.tasks[runner.name].cache {
+        Some(cache) => cache.clone(),
+        None => Cache {
+            path: string!(""),
+            target: string!(""),
+        },
+    };
+
     let exit_code = helpers::status::code(status);
     let success = helpers::status::success(&status);
 
@@ -107,6 +115,18 @@ fn run_script(runner: Runner, mut retry_times: i32) {
     if !runner.silent && retry_times < 1 {
         if success {
             println!("\n{} {}", helpers::string::check_icon(), "finished task successfully".bright_green());
+            if !cache.path.trim().is_empty() && !cache.target.trim().is_empty() {
+                match std::fs::copy(format!("{}", cache.target.clone()), format!(".maid/cache/{}/target/{}", runner.name, cache.target.clone())) {
+                    Ok(_) => {
+                        println!("{}", format!("saved target '{}' to cache", cache.target.clone()).bright_magenta());
+                        log::debug!("saved target file {}", cache.target.clone())
+                    }
+                    Err(err) => {
+                        log::warn!("{err}");
+                        crashln!("Cannot save target file.");
+                    }
+                };
+            }
             println!("{} took {}", runner.name.white(), format!("{:.2?}", start.elapsed()).yellow());
         } else {
             println!("\n{} {} {}", helpers::string::cross_icon(), "exited with status code".bright_red(), format!("{}", exit_code).red());
