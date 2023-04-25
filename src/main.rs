@@ -43,6 +43,8 @@ enum Butler {
     Info,
     /// Test server specified in maidfile
     Connect,
+    /// Create new maidfile
+    Init,
     /// Clear maid cache
     Clean,
     /// Watch maidfile task
@@ -64,6 +66,7 @@ fn main() {
             Butler::Info => cli::info(&cli.path),
             Butler::Clean => cli::butler::clean(),
             Butler::Connect => println!("test server here"),
+            Butler::Init => cli::butler::init(), // add project name and version to init command
             Butler::Watch => cli::butler::watch(Path::new("src")),
             Butler::Tasks => cli::tasks::list(&cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),
         },
