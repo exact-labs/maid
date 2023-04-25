@@ -68,13 +68,13 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, log_lev
             }
 
             let hash = task::cache::create_hash(&cache.path);
-            let config_path = format!(".maid/cache/{task}/config.json");
+            let config_path = format!(".maid/cache/{task}/{}.toml", task);
             let cache_file = format!(".maid/cache/{task}/target/{}", cache.target.clone());
 
             if !helpers::Exists::file(config_path.clone()).unwrap() {
                 match std::fs::write(
                     config_path.clone(),
-                    serde_json::to_string(&CacheConfig {
+                    toml::to_string(&CacheConfig {
                         target: cache.target.clone(),
                         hash: string!(""),
                     })
@@ -90,7 +90,7 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, log_lev
                 Err(err) => crashln!("Cannot read cache config: {err}"),
             };
 
-            let json = match serde_json::from_str::<CacheConfig>(&contents) {
+            let json = match toml::from_str::<CacheConfig>(&contents) {
                 Ok(contents) => contents,
                 Err(err) => crashln!("Cannot read cache config: {err}"),
             };
@@ -115,7 +115,7 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, log_lev
             } else {
                 match std::fs::write(
                     config_path.clone(),
-                    serde_json::to_string(&CacheConfig {
+                    toml::to_string(&CacheConfig {
                         target: cache.target.clone(),
                         hash: hash.clone(),
                     })

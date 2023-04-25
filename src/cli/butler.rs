@@ -1,10 +1,17 @@
 use crate::helpers;
 
 use colored::Colorize;
-use macros_rs::{crashln, string};
+use inquire::Text;
+use macros_rs::string;
 use notify::RecursiveMode;
 use notify_debouncer_mini::new_debouncer;
-use std::{path::Path, time::Duration};
+use std::{fs::File, io::Write, path::Path, time::Duration};
+
+fn create_error(name: &str) {
+    println!("An error happened when asking for {name}, try again later.");
+    std::fs::remove_file("maidfile").unwrap();
+    std::process::exit(1);
+}
 
 pub fn watch(path: &Path) {
     let (tx, rx) = std::sync::mpsc::channel();
@@ -22,10 +29,29 @@ pub fn init() {
     let example_maidfile = "[tasks.example]\ninfo = \"this is a comment\"\nscript = \"echo 'hello world'\"";
 
     if !helpers::Exists::file(string!("maidfile")).unwrap() {
-        match std::fs::write("maidfile", example_maidfile) {
-            Ok(_) => println!("{}", "initialized new maidfile".green()), // add "dont forget to add .maid to your gitignore" comment after creation
-            Err(_) => crashln!("error creating new maidfile"),
-        };
+        println!("This utility will walk you through creating a maidfile.\n");
+
+        let mut file = File::create("maidfile").unwrap();
+        let current_dir = std::env::current_dir().unwrap();
+        writeln!(&mut file, "[project]").unwrap();
+
+        let name = Text::new("project name:").with_default(&current_dir.file_name().unwrap().to_str().unwrap().to_string()).prompt();
+        let version = Text::new("version:").with_default("1.0.0").prompt();
+
+        match name {
+            Ok(name) => writeln!(&mut file, "name = \"{name}\"").unwrap(),
+            Err(_) => create_error("project name"),
+        }
+        match version {
+            Ok(version) => writeln!(&mut file, "version = \"{version}\"").unwrap(),
+            Err(_) => create_error("version"),
+        }
+
+        writeln!(&mut file, "\n{example_maidfile}").unwrap();
+        println!("{}", "\n✨ success, saved maidfile".yellow());
+        if helpers::Exists::file(string!(".git")).unwrap() {
+            println!("{}", "dont forget to add '.maid' to your .gitignore".white());
+        }
     } else {
         println!("{}", "maidfile already exists, aborting".yellow())
     }
