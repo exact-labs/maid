@@ -5,13 +5,13 @@ use merge_struct::merge;
 use optional_field::Field;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::json;
-use std::{collections::BTreeMap, collections::HashMap, env, time::Instant};
+use std::{collections::BTreeMap, collections::HashMap, env};
 use text_placeholder::Template;
 use toml::Value;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Maidfile {
-    pub import: Field<Vec<String>>,
+    pub import: Option<Vec<String>>,
     pub env: Field<BTreeMap<String, Value>>,
     pub project: Field<Project>,
     pub tasks: BTreeMap<String, Tasks>,
@@ -33,7 +33,7 @@ pub struct Server {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Tasks {
     pub script: Value,
-    pub retry: Field<i64>,
+    pub retry: Option<i32>,
     pub hide: Field<bool>,
     pub cache: Field<bool>,
     pub path: Field<String>,
@@ -161,7 +161,6 @@ pub fn exec(task: &String, args: &Vec<String>, path: &String, silent: bool, log_
     if task == "" {
         tasks::list(path, silent, log_level)
     } else {
-        let start = Instant::now();
         let values = read_maidfile_merge(path);
         let cwd = &helpers::file::get_current_working_dir();
 
@@ -182,15 +181,11 @@ pub fn exec(task: &String, args: &Vec<String>, path: &String, silent: bool, log_
         if !silent {
             ternary!(
                 task_path == cwd,
-                println!("{} {}", "»".white(), &values.tasks[task].script),
-                println!("{} {} {}", format!("({task_path})").bright_cyan(), "»".white(), &values.tasks[task].script)
+                println!("{} {}", helpers::string::arrow_icon(), &values.tasks[task].script),
+                println!("{} {} {}", format!("({task_path})").bright_cyan(), helpers::string::arrow_icon(), &values.tasks[task].script)
             )
         }
-        run::task(&values, &values.tasks[task].script, task_path, args);
-        if !silent {
-            println!("\n{} {}", "✔".green(), "finished task successfully".bright_green());
-            println!("{} took {}", task.white(), format!("{:.2?}", start.elapsed()).yellow());
-        }
+        run::task(&values, task, &values.tasks[task].script, task_path, args, silent);
     }
 }
 
