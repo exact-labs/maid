@@ -62,8 +62,8 @@ fn main() {
         Some(Commands::Butler { internal }) => match internal {
             Butler::Json { hydrate } => cli::tasks::json(&cli.path, &cli.task, hydrate),
             Butler::Info => cli::info(&cli.path),
+            Butler::Clean => cli::butler::clean(),
             Butler::Connect => println!("test server here"),
-            Butler::Clean => println!("delete maid cache"),
             Butler::Watch => cli::butler::watch(Path::new("src")),
             Butler::Tasks => cli::tasks::list(&cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),
         },

@@ -5,6 +5,8 @@ use crate::structs::{Cache, Runner};
 use crate::table;
 
 use colored::Colorize;
+use fs_extra::dir::get_size;
+use human_bytes::human_bytes;
 use macros_rs::{crashln, inc, string};
 use serde_json::json;
 use std::io::Error;
@@ -116,9 +118,14 @@ fn run_script(runner: Runner, mut retry_times: i32) {
         if success {
             println!("\n{} {}", helpers::string::check_icon(), "finished task successfully".bright_green());
             if !cache.path.trim().is_empty() && !cache.target.trim().is_empty() {
-                match std::fs::copy(format!("{}", cache.target.clone()), format!(".maid/cache/{}/target/{}", runner.name, cache.target.clone())) {
+                let cache_file = format!(".maid/cache/{}/target/{}", runner.name, cache.target.clone());
+                match std::fs::copy(cache.target.clone(), cache_file.clone()) {
                     Ok(_) => {
-                        println!("{}", format!("saved target '{}' to cache", cache.target.clone()).bright_magenta());
+                        println!(
+                            "{} ({})",
+                            format!("saved target '{}' to cache", cache.target.clone()).bright_magenta(),
+                            format!("{}", human_bytes(get_size(cache_file.clone()).unwrap() as f64).white())
+                        );
                         log::debug!("saved target file {}", cache.target.clone())
                     }
                     Err(err) => {

@@ -1,7 +1,7 @@
-use std::{path::Path, time::Duration};
-
+use colored::Colorize;
 use notify::RecursiveMode;
 use notify_debouncer_mini::new_debouncer;
+use std::{path::Path, time::Duration};
 
 pub fn watch(path: &Path) {
     let (tx, rx) = std::sync::mpsc::channel();
@@ -13,4 +13,11 @@ pub fn watch(path: &Path) {
             println!("{:?}", event);
         }
     }
+}
+
+pub fn clean() {
+    match std::fs::remove_dir_all(".maid/cache") {
+        Ok(_) => println!("{}", "cleaned maid cache".green()),
+        Err(_) => println!("{}", "maid cache does not exist, cannot remove".yellow()),
+    };
 }

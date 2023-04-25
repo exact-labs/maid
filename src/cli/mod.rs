@@ -3,6 +3,8 @@ use crate::structs::{Cache, CacheConfig, Task};
 use crate::task;
 
 use colored::Colorize;
+use fs_extra::dir::get_size;
+use human_bytes::human_bytes;
 use macros_rs::{crashln, string, ternary};
 use std::env;
 
@@ -67,6 +69,7 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, log_lev
 
             let hash = task::cache::create_hash(&cache.path);
             let config_path = format!(".maid/cache/{task}/config.json");
+            let cache_file = format!(".maid/cache/{task}/target/{}", cache.target.clone());
 
             if !helpers::Exists::file(config_path.clone()).unwrap() {
                 match std::fs::write(
@@ -94,9 +97,13 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, log_lev
 
             if json.hash == hash {
                 println!("{}", "skipping task due to cached files".bright_magenta());
-                println!("{}", format!("copied target '{}' from cache", cache.target.clone()).magenta());
+                println!(
+                    "{} ({})",
+                    format!("copied target '{}' from cache", cache.target.clone()).magenta(),
+                    format!("{}", human_bytes(get_size(cache_file.clone()).unwrap() as f64).white())
+                );
 
-                match std::fs::copy(format!(".maid/cache/{task}/target/{}", cache.target.clone()), format!("{}", cache.target.clone())) {
+                match std::fs::copy(cache_file, cache.target.clone()) {
                     Ok(_) => log::debug!("copied target file {}", cache.target.clone()),
                     Err(err) => {
                         log::warn!("{err}");
