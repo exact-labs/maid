@@ -8,7 +8,6 @@ use colored::Colorize;
 use inquire::Select;
 use macros_rs::{crashln, string, ternary};
 use merge_struct::merge;
-use optional_field::Field;
 use text_placeholder::Template;
 
 pub fn json(path: &String, args: &Vec<String>, hydrate: &bool) {
@@ -39,9 +38,8 @@ pub fn list(path: &String, silent: bool, log_level: Option<log::Level>) {
         .iter()
         .map(|(key, task)| {
             let info = match &task.info {
-                Field::Present(Some(info)) => ternary!(info.trim().len() < 1, string!("(no description)").bright_red(), format!("({info})").white()),
-                Field::Present(None) => string!("(no description)").bright_red(),
-                Field::Missing => string!("(no description)").bright_red(),
+                Some(info) => ternary!(info.trim().len() < 1, string!("(no description)").bright_red(), format!("({info})").white()),
+                None => string!("(no description)").bright_red(),
             };
 
             let verbose = match log_level.unwrap() {

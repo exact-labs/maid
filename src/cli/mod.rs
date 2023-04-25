@@ -3,7 +3,6 @@ use crate::structs::Task;
 
 use colored::Colorize;
 use macros_rs::{crashln, string, ternary};
-use optional_field::Field;
 use std::env;
 
 pub fn info(path: &String) {
@@ -47,9 +46,8 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, log_lev
         }
 
         let task_path = match &values.tasks[task].path {
-            Field::Present(Some(path)) => ternary!(path == "", cwd, path),
-            Field::Present(None) => cwd,
-            Field::Missing => cwd,
+            Some(path) => ternary!(path == "", cwd, path),
+            None => cwd,
         };
 
         log::debug!("Task path: {}", task_path);
