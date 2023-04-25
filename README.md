@@ -15,7 +15,6 @@ Once maid is installed and working, create a file named maidfile in the root of 
 
 ```toml
 [tasks.hello]
-path = ""
 info = "this is a comment"
 script = "echo 'hello world'"
 ```
@@ -25,7 +24,7 @@ Running maid with no arguments shows a list of tasks in the maidfile:
 ```bash
 ~ $ maid
 ? Select a task to run:
-> hello: this is a comment
+> hello (this is a comment)
 [↑↓ to move, enter to select, type to filter]
 ```
 
