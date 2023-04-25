@@ -2,5 +2,7 @@
 name = "pretty_number"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "numbers -> word"
 
 [dependencies]

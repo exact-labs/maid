@@ -1,6 +1,6 @@
 use std::fmt::{self, Formatter};
 
-pub fn pretty_number(mut n: u16) -> Number {
+pub fn value(mut n: u16) -> Number {
     let ones = digit(n % 10);
     n /= 10;
     let tens = digit(n % 10);

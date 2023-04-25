@@ -7,6 +7,9 @@ repository = "https://github.com/exact-rs/maid"
 description = "🔨 An easy to use make alternative."
 
 [dependencies]
+# local
+pretty_number = { package = "pretty_number", path = "./crates/pretty_number", version = "0.1.0" }
+
 log = "0.4.17"
 home = "0.5.4"
 toml = "0.5.11"

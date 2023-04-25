@@ -196,6 +196,7 @@ dependencies = [
  "macros-rs",
  "merge-struct",
  "optional-field",
+ "pretty_number",
  "serde",
  "serde_derive",
  "serde_json",
@@ -440,6 +441,10 @@ dependencies = [
  "smallvec",
  "windows-sys",
 ]
+
+[[package]]
+name = "pretty_number"
+version = "0.1.0"
 
 [[package]]
 name = "proc-macro-error"
