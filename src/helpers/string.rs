@@ -5,6 +5,10 @@ pub fn to_static_str(str: String) -> &'static str {
     Box::leak(str.into_boxed_str())
 }
 
+pub fn warn_icon() -> ColoredString {
+    "⚠".yellow()
+}
+
 pub fn arrow_icon() -> ColoredString {
     "»".white()
 }

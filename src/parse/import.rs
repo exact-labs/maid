@@ -1,8 +1,8 @@
-use crate::cli::Maidfile;
 use crate::helpers;
+use crate::structs::Maidfile;
 use macros_rs::fmtstr;
 
-pub fn tasks(path_list: Option<Vec<String>>) -> Vec<Maidfile> {
+pub fn push(path_list: Option<Vec<String>>) -> Vec<Maidfile> {
     let mut values: Vec<Maidfile> = vec![];
 
     let mut add_values = |paths: Vec<String>| {

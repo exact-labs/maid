@@ -137,7 +137,7 @@ impl fmt::Display for Number {
             spacing = Space::One;
         }
         match self.tens {
-            Zero if self.ones == Zero && spacing == Space::One => Ok(()), // skip trailing 00
+            Zero if self.ones == Zero && spacing == Space::One => Ok(()),
             Zero => write!(f, "{}{}", spacing, self.ones),
             One => write!(f, "{}{}", spacing, Teens(self.ones)),
             _ if self.ones == Zero => write!(f, "{}{}", spacing, Tens(self.tens)),

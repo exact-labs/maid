@@ -1,6 +1,9 @@
 mod cli;
 mod helpers;
+mod parse;
 mod shell;
+mod structs;
+mod table;
 
 use clap::{Parser, Subcommand};
 use clap_verbosity_flag::Verbosity;
@@ -59,6 +62,6 @@ fn main() {
             Butler::Clean => println!("delete maid cache"),
             Butler::Tasks => cli::tasks::list(&cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),
         },
-        None => cli::exec(&cli.task[0], &cli.task, &cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),
+        None => cli::exec(cli.task[0].trim(), &cli.task, &cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),
     }
 }

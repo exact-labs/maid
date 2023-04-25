@@ -1,4 +1,4 @@
-use crate::cli::Maidfile;
+use crate::structs::Maidfile;
 use macros_rs::{crashln, fmtstr, then};
 use serde_json::json;
 use std::{env, fs, path::Path, path::PathBuf};

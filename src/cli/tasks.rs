@@ -1,5 +1,9 @@
 use crate::cli;
 use crate::helpers;
+use crate::parse;
+use crate::structs;
+use crate::table;
+
 use colored::Colorize;
 use inquire::Select;
 use macros_rs::{crashln, string, ternary};
@@ -7,23 +11,9 @@ use merge_struct::merge;
 use optional_field::Field;
 use text_placeholder::Template;
 
-#[derive(Debug)]
-struct Task {
-    name: String,
-    formatted: String,
-    hidden: bool,
-}
-
-impl std::fmt::Display for Task {
-    #[inline]
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(&self.formatted, f)
-    }
-}
-
 pub fn json(path: &String, args: &Vec<String>, hydrate: &bool) {
     let mut values = helpers::file::read_maidfile(path);
-    let imported_values = cli::import::tasks(values.import.clone());
+    let imported_values = parse::import::push(values.import.clone());
 
     for import in imported_values.iter() {
         values = match merge(&values, &import) {
@@ -35,8 +25,8 @@ pub fn json(path: &String, args: &Vec<String>, hydrate: &bool) {
         };
     }
 
-    let json = helpers::struct_to_json(values.clone());
-    let table = cli::create_table(values.clone(), args);
+    let json = values.clone().to_json();
+    let table = table::create(values.clone(), args);
     let hydrated_json = Template::new_with_placeholder(&json, "%{", "}").fill_with_hashmap(&table);
 
     println!("{}", ternary!(hydrate.clone(), hydrated_json, json))
@@ -62,13 +52,12 @@ pub fn list(path: &String, silent: bool, log_level: Option<log::Level>) {
             let hidden = match key.starts_with("_") {
                 true => true,
                 false => match task.hide {
-                    Field::Present(Some(val)) => val,
-                    Field::Present(None) => false,
-                    Field::Missing => false,
+                    Some(val) => val,
+                    None => false,
                 },
             };
 
-            return Task {
+            return structs::DisplayTask {
                 name: key.clone(),
                 formatted: format!("{} {} {}", format!("{key}").bright_yellow(), info, verbose.bright_blue()),
                 hidden: hidden.clone(),

@@ -41,10 +41,11 @@ buildall = { info = "build all", script = ["rm -rf build", "mkdir build", "maid 
 
 # testing
 test = { script = "echo hello world" }
+hidden = { script = "echo hidden", hide = true }
 debug = { info = "debug env", path="src", script = ["echo %{env.BOOL}", "echo %{env.STRING}", "echo %{arg.1}", "echo %{dir.current}", "echo %{dir.home}", "echo %{env.TYPE}", "echo %{env.ARR}", "echo %{os.platform}", "echo %{os.arch}"] }
 broken = { info = "bad task", script = ["this_does_not_exist"] }
 
 # exit types
-"exit bad" = { script = ["exit-test 0", "exit-test 1", "exit-test 2"] }
-"exit good" = { script = ["exit-test 2", "exit-test 1", "exit-test 0"] }
-"exit" = { script = "exit-test 1", retry = 3 }
+"exit bad" = { script = ["exit_test 0", "exit_test 1", "exit_test 2"] }
+"exit good" = { script = ["exit_test 2", "exit_test 1", "exit_test 0"] }
+"exit" = { script = "exit_test 1", retry = 3 }
