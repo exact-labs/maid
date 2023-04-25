@@ -86,7 +86,7 @@ fn run(values: &cli::Maidfile, task: &String, scripts: Vec<&str>, path: &String,
         crashln!(
             "{} {} {}",
             helpers::string::cross_icon(),
-            "max retries reached, exited with status code".bright_red(),
+            format!("max of {} retries reached\n - exited with status code", helpers::pretty_number(retry as u16)).bright_red(),
             format!("{}", exit_code).red()
         );
     }
