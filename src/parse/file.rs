@@ -36,6 +36,7 @@ fn find_file(starting_directory: &Path, filename: &String) -> Option<PathBuf> {
         let yaml = find_kind(".yaml", path.clone());
         let yml = find_kind(".yml", path.clone());
         let json = find_kind(".json", path.clone());
+        let json5 = find_kind(".json5", path.clone());
         let toml = find_kind(".toml", path.clone());
 
         if default.is_file {
@@ -49,6 +50,9 @@ fn find_file(starting_directory: &Path, filename: &String) -> Option<PathBuf> {
         }
         if json.is_file {
             break json.path;
+        }
+        if json5.is_file {
+            break json5.path;
         }
         if toml.is_file {
             break toml.path;
@@ -90,6 +94,16 @@ fn read_file(path: PathBuf, kind: &str) -> Maidfile {
         }
     };
 
+    let read_json5 = |contents: &String| -> Maidfile {
+        match json5::from_str(contents) {
+            Ok(contents) => contents,
+            Err(err) => {
+                log::warn!("{err}");
+                crashln!("Cannot read maidfile.");
+            }
+        }
+    };
+
     let read_toml = |contents: &String| -> Maidfile {
         match toml::from_str(contents) {
             Ok(contents) => contents,
@@ -104,6 +118,7 @@ fn read_file(path: PathBuf, kind: &str) -> Maidfile {
         "yaml" => read_yaml(&contents),
         "yml" => read_yaml(&contents),
         "json" => read_json(&contents),
+        "json5" => read_json5(&contents),
         "toml" => read_toml(&contents),
         _ => {
             crashln!("Cannot read maidfile.");
@@ -122,6 +137,7 @@ pub fn read_maidfile_with_error(filename: &String, error: &str) -> Maidfile {
                     Some("yaml") => read_file(path, "yaml"),
                     Some("yml") => read_file(path, "yml"),
                     Some("json") => read_file(path, "json"),
+                    Some("json5") => read_file(path, "json5"),
                     Some("toml") => read_file(path, "toml"),
                     Some(_) => read_file(path, "toml"),
                     None => read_file(path, "toml"),
