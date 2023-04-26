@@ -9,9 +9,9 @@ version = "0.0.1"
 
 [project.server]
 address = { ip = "localhost", port = 3500, ssl = false }
-token = "ZWZ0Z3loZHVpandzZGhneXVpb2w="
+token = "test_token"
 
 [tasks.test]
 script = "echo %{env.STRING}"
 depends = ["other"]
-remote = {push = ["src", "cargo.toml"], pull = "maid", dependencies = "rust"}
+remote = { push = ["src", "cargo.toml"], pull = ["maid"], image = "rust" }

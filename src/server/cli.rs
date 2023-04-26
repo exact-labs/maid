@@ -3,14 +3,15 @@ use crate::helpers;
 use crate::server;
 
 use colored::Colorize;
-use macros_rs::{crashln, ternary};
+use macros_rs::{crashln, fmtstr, ternary};
 
 pub fn connect(path: &String) {
     let values = helpers::maidfile::merge(path);
-    let server = server::parse::address(values);
-    let test_path = format!("{server}/api/health");
+    let server = server::parse::address(values.clone());
+    let token = server::parse::token(values.clone());
+    let client = reqwest::blocking::Client::new();
 
-    let res = match reqwest::blocking::get(test_path) {
+    let response = match client.get(fmtstr!("{server}/api/health")).header("Authorization", fmtstr!("{token}")).send() {
         Ok(res) => res,
         Err(err) => {
             log::warn!("{err}");
@@ -18,9 +19,12 @@ pub fn connect(path: &String) {
         }
     };
 
-    let body = match res.json::<api::health::Route>() {
+    let body = match response.json::<api::health::Route>() {
         Ok(body) => body,
-        Err(err) => crashln!("{err}"),
+        Err(err) => {
+            log::warn!("{err}");
+            crashln!("Unable to connect to the maid server. Is the token correct?")
+        }
     };
 
     println!(

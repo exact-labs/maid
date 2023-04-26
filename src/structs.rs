@@ -19,8 +19,8 @@ pub struct Project {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Server {
-    pub address: Address,      // wip
-    pub token: Option<String>, // wip
+    pub address: Address, // wip
+    pub token: String,    // wip
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -56,9 +56,9 @@ pub struct CacheConfig {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Remote {
-    pub push: Option<Value>,         // wip
-    pub pull: Option<Value>,         // wip
-    pub dependencies: Option<Value>, // wip
+    pub push: Vec<String>, // wip
+    pub pull: Vec<String>, // wip
+    pub image: String,     // wip
 }
 
 #[derive(Clone)]

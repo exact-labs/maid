@@ -23,3 +23,13 @@ pub fn ip(values: Maidfile) -> String {
         None => string!(""),
     }
 }
+
+pub fn token(values: Maidfile) -> String {
+    match &values.project {
+        Some(project) => match &project.server {
+            Some(server) => server.token.clone(),
+            None => string!(""),
+        },
+        None => string!(""),
+    }
+}
