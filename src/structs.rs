@@ -15,13 +15,13 @@ pub struct Maidfile {
 pub struct Project {
     pub name: Option<String>,
     pub version: Option<String>,
-    pub server: Option<Server>,
+    pub server: Option<Server>, // wip
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Server {
-    pub address: Address,
-    pub token: Field<String>,
+    pub address: Address,     // wip
+    pub token: Field<String>, // wip
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -32,8 +32,8 @@ pub struct Tasks {
     pub path: Option<String>,
     pub info: Option<String>,
     pub cache: Option<Cache>,
-    pub remote: Option<Remote>,
-    pub depends: Option<Value>,
+    pub remote: Option<Remote>, // wip
+    pub depends: Option<Vec<String>>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -50,16 +50,15 @@ pub struct CacheConfig {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Address {
-    pub ip: Field<String>,
-    pub port: Field<i64>,
+    pub ip: Field<String>, // wip
+    pub port: Field<i64>,  // wip
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Remote {
-    pub push: Field<Value>,
-    pub pull: Field<Value>,
-    pub worker: Field<String>,
-    pub dependencies: Field<Value>,
+    pub push: Field<Value>,         // wip
+    pub pull: Field<Value>,         // wip
+    pub dependencies: Field<Value>, // wip
 }
 
 #[derive(Clone)]
@@ -70,6 +69,7 @@ pub struct Task {
     pub path: String,
     pub args: Vec<String>,
     pub silent: bool,
+    pub is_dep: bool,
 }
 
 #[derive(Clone)]
@@ -80,6 +80,7 @@ pub struct Runner<'a> {
     pub path: &'a String,
     pub args: &'a Vec<String>,
     pub silent: bool,
+    pub is_dep: bool,
 }
 
 #[derive(Debug)]

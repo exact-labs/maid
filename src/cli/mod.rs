@@ -5,6 +5,7 @@ use crate::task;
 use colored::Colorize;
 use fs_extra::dir::get_size;
 use human_bytes::human_bytes;
+use indicatif::{ProgressBar, ProgressStyle};
 use macros_rs::{crashln, string, ternary};
 use std::env;
 
@@ -35,7 +36,7 @@ pub fn info(path: &String) {
     );
 }
 
-pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, log_level: Option<log::Level>) {
+pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep: bool, log_level: Option<log::Level>) {
     log::info!("Starting maid {}", env!("CARGO_PKG_VERSION"));
 
     if task.is_empty() {
@@ -46,6 +47,20 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, log_lev
 
         if values.tasks.get(task).is_none() {
             crashln!("Maid could not find the task '{task}'. Does it exist?");
+        }
+
+        for item in match &values.tasks[task].depends {
+            Some(deps) => deps.clone(),
+            None => vec![],
+        } {
+            let pb = ProgressBar::new_spinner();
+            pb.enable_steady_tick(std::time::Duration::from_millis(80));
+            pb.set_style(ProgressStyle::with_template("{spinner:.yellow}{msg}").unwrap().tick_strings(&[
+                "[    ] ", "[=   ] ", "[==  ] ", "[=== ] ", "[ ===] ", "[  ==] ", "[   =] ", "[    ] ", "[   =] ", "[  ==] ", "[ ===] ", "[====] ", "[=== ] ", "[==  ] ", "[=   ] ", "",
+            ]));
+            pb.set_message(format!("{} {item}", "running dependency".bright_yellow()));
+            exec(&item, args, path, true, true, log_level);
+            pb.finish_with_message(format!("{} {} {item}", helpers::string::check_icon(), "finished dependency".bright_green()));
         }
 
         let cache = match &values.tasks[task].cache {
@@ -146,6 +161,7 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, log_lev
             path: task_path.clone(),
             args: args.clone(),
             silent,
+            is_dep,
         });
     }
 }

@@ -35,3 +35,4 @@ clap-verbosity-flag = "2.0.0"
 notify-debouncer-mini = "0.2.1"
 clap = { version = "4.1.1", features = ["derive"] }
 human_bytes = { version = "0.4.1", default-features = false }
+indicatif = "0.17.3"

@@ -15,6 +15,7 @@ use std::time::Instant;
 use text_placeholder::Template;
 
 fn run_script(runner: Runner, mut retry_times: i32) {
+    let mut cmd;
     let start = Instant::now();
     let mut status_array: Vec<Result<ExitStatus, Error>> = vec![];
 
@@ -45,20 +46,37 @@ fn run_script(runner: Runner, mut retry_times: i32) {
         log::trace!("{}", json!({"name": name, "args": args}));
         log::info!("Execute Command: '{name} {}'", args.join(" "));
 
-        let mut cmd = match Command::new(&name)
-            .args(args.clone())
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .stdin(Stdio::inherit())
-            .current_dir(runner.path)
-            .spawn()
-        {
-            Ok(output) => output, // add silent no output mode when in deps unless verbose
-            Err(err) => {
-                log::warn!("{err}");
-                crashln!("Cannot start command {name}.");
-            }
-        };
+        if runner.is_dep {
+            cmd = match Command::new(&name)
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .stdin(Stdio::null())
+                .args(args.clone())
+                .current_dir(runner.path)
+                .spawn()
+            {
+                Ok(output) => output,
+                Err(err) => {
+                    log::warn!("{err}");
+                    crashln!("Cannot start command {name}.");
+                }
+            };
+        } else {
+            cmd = match Command::new(&name)
+                .args(args.clone())
+                .stdout(Stdio::inherit())
+                .stderr(Stdio::inherit())
+                .stdin(Stdio::inherit())
+                .current_dir(runner.path)
+                .spawn()
+            {
+                Ok(output) => output,
+                Err(err) => {
+                    log::warn!("{err}");
+                    crashln!("Cannot start command {name}.");
+                }
+            };
+        }
 
         let status = cmd.wait();
         let exit_code = helpers::status::code(&status);
@@ -77,6 +95,7 @@ fn run_script(runner: Runner, mut retry_times: i32) {
                         path: runner.path,
                         args: runner.args,
                         silent: runner.silent,
+                        is_dep: runner.is_dep,
                         maidfile: runner.maidfile,
                         script: runner.script.clone(),
                     },
@@ -175,6 +194,7 @@ pub fn task(task: cli::Task) {
             path: &task.path,
             args: &task.args,
             silent: task.silent,
+            is_dep: task.is_dep,
             maidfile: &task.maidfile,
             script,
         },

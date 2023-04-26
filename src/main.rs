@@ -70,6 +70,6 @@ fn main() {
             Butler::Watch => cli::butler::watch(Path::new("src")),
             Butler::Tasks => cli::tasks::list(&cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),
         },
-        None => cli::exec(cli.task[0].trim(), &cli.task, &cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),
+        None => cli::exec(cli.task[0].trim(), &cli.task, &cli.path, cli.verbose.is_silent(), false, cli.verbose.log_level()),
     }
 }

@@ -8,10 +8,10 @@ name = "debug"
 version = "0.0.1"
 
 [project.server]
-address = {ip = "localhost", port = 3000 }
+address = { ip = "localhost", port = 3000 }
 token = "ZWZ0Z3loZHVpandzZGhneXVpb2w="
 
 [tasks.test]
 script = "echo %{env.STRING}"
-depends = "other"
+depends = ["other"]
 remote = {push = ["src", "cargo.toml"], pull = "maid", dependencies = "rust"}

@@ -66,7 +66,7 @@ pub fn list(path: &String, silent: bool, log_level: Option<log::Level>) {
     match Select::new("Select a task to run:", options).prompt() {
         Ok(task) => {
             log::debug!("Starting {}", task.name);
-            cli::exec(&String::from(task.name), &vec![String::from("")], &path, silent, log_level);
+            cli::exec(&String::from(task.name), &vec![String::from("")], &path, silent, false, log_level);
         }
         Err(_) => println!("{}", "Aborting...".white()),
     }
