@@ -1,3 +1,7 @@
+[project.server]
+address = { ip = "localhost", port = 3500, ssl = false }
+token = "ZWZ0Z3loZHVpandzZGhneXVpb2w="
+
 # imports go at the top of the file (in toml)
 [env]
 BOOL = false

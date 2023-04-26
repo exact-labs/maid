@@ -1,4 +1,3 @@
-use optional_field::Field;
 use serde_derive::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use toml::Value;
@@ -20,8 +19,15 @@ pub struct Project {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Server {
-    pub address: Address,     // wip
-    pub token: Field<String>, // wip
+    pub address: Address,      // wip
+    pub token: Option<String>, // wip
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Address {
+    pub ip: String, // wip
+    pub port: i64,  // wip
+    pub ssl: bool,  // wip
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -49,16 +55,10 @@ pub struct CacheConfig {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Address {
-    pub ip: Field<String>, // wip
-    pub port: Field<i64>,  // wip
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Remote {
-    pub push: Field<Value>,         // wip
-    pub pull: Field<Value>,         // wip
-    pub dependencies: Field<Value>, // wip
+    pub push: Option<Value>,         // wip
+    pub pull: Option<Value>,         // wip
+    pub dependencies: Option<Value>, // wip
 }
 
 #[derive(Clone)]

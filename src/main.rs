@@ -1,6 +1,8 @@
+mod api;
 mod cli;
 mod helpers;
 mod parse;
+mod server;
 mod shell;
 mod structs;
 mod table;
@@ -65,8 +67,8 @@ fn main() {
             Butler::Json { hydrate } => cli::tasks::json(&cli.path, &cli.task, hydrate),
             Butler::Info => cli::info(&cli.path),
             Butler::Clean => cli::butler::clean(),
-            Butler::Connect => println!("test server here"),
-            Butler::Init => cli::butler::init(), // add project name and version to init command
+            Butler::Connect => server::cli::connect(&cli.path),
+            Butler::Init => cli::butler::init(),
             Butler::Watch => cli::butler::watch(Path::new("src")),
             Butler::Tasks => cli::tasks::list(&cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),
         },

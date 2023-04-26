@@ -8,7 +8,7 @@ name = "debug"
 version = "0.0.1"
 
 [project.server]
-address = { ip = "localhost", port = 3000 }
+address = { ip = "localhost", port = 3500, ssl = false }
 token = "ZWZ0Z3loZHVpandzZGhneXVpb2w="
 
 [tasks.test]
