@@ -7,22 +7,17 @@ use crate::table;
 use colored::Colorize;
 use fs_extra::dir::get_size;
 use human_bytes::human_bytes;
-use macros_rs::{crashln, inc, string};
+use macros_rs::{crashln, string};
 use serde_json::json;
 use std::io::Error;
 use std::process::{Command, ExitStatus, Stdio};
 use std::time::Instant;
 use text_placeholder::Template;
 
-fn run_script(runner: Runner, mut retry_times: i32) {
+fn run_script(runner: Runner) {
     let mut cmd;
     let start = Instant::now();
     let mut status_array: Vec<Result<ExitStatus, Error>> = vec![];
-
-    let retry = match runner.maidfile.tasks[runner.name].retry {
-        Some(retry) => retry,
-        None => 0,
-    };
 
     for string in runner.script.clone() {
         let start = Instant::now();
@@ -80,30 +75,6 @@ fn run_script(runner: Runner, mut retry_times: i32) {
 
         let status = cmd.wait();
         let exit_code = helpers::status::code(&status);
-        let success = helpers::status::success(&status);
-
-        // fix this, it is very broken (loops wrong and doesnt show message)
-        if !success && retry >= 1 {
-            print!("\n");
-
-            if retry > retry_times {
-                inc!(retry_times);
-                println!("{} {} {}", helpers::string::warn_icon(), "retry attempt".bright_yellow(), format!("{}", retry_times).yellow());
-
-                run_script(
-                    Runner {
-                        name: runner.name,
-                        path: runner.path,
-                        args: runner.args,
-                        silent: runner.silent,
-                        is_dep: runner.is_dep,
-                        maidfile: runner.maidfile,
-                        script: runner.script.clone(),
-                    },
-                    retry_times,
-                );
-            }
-        }
 
         status_array.push(status);
         log::debug!("Finished cmd: '{name} {}' with exit code: {:?} in {:.2?}", args.join(" "), exit_code, start.elapsed());
@@ -125,16 +96,7 @@ fn run_script(runner: Runner, mut retry_times: i32) {
     let exit_code = helpers::status::code(status);
     let success = helpers::status::success(&status);
 
-    if !success && retry > retry_times && retry >= 1 {
-        crashln!(
-            "{} {} {}",
-            helpers::string::cross_icon(),
-            format!("max of {} retries reached\n - exited with status code", pretty_number::value(retry as u16)).bright_red(),
-            format!("{}", exit_code).red()
-        );
-    }
-
-    if !runner.silent && retry_times < 1 {
+    if !runner.silent {
         if success {
             println!("\n{} {}", helpers::string::check_icon(), "finished task successfully".bright_green());
             if !cache.path.trim().is_empty() && !cache.target.trim().is_empty() {
@@ -189,16 +151,13 @@ pub fn task(task: cli::Task) {
         helpers::status::error(task.script.type_str())
     }
 
-    run_script(
-        Runner {
-            name: &task.name,
-            path: &task.path,
-            args: &task.args,
-            silent: task.silent,
-            is_dep: task.is_dep,
-            maidfile: &task.maidfile,
-            script,
-        },
-        0,
-    );
+    run_script(Runner {
+        name: &task.name,
+        path: &task.path,
+        args: &task.args,
+        silent: task.silent,
+        is_dep: task.is_dep,
+        maidfile: &task.maidfile,
+        script,
+    });
 }

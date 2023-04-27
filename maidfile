@@ -44,7 +44,7 @@ crates = { path="crates/server", info = "build maid crates", script = ["cargo bu
 buildall = { info = "build all", script = ["rm -rf build", "mkdir build", "maid _build_macos", "maid _build_linux", "maid _build_windows"] }
 
 # test dependencies
-test = { script = "echo hello world", depends = ["dep1", "dep2"] }
+test = { script = "echo hello world", depends = ["dep1", "dep2", "exit bad"] }
 dep1 = { script = "sleep 3", hide = true }
 dep2 = { script = "sleep 2", hide = true }
 
@@ -55,5 +55,5 @@ broken = { info = "bad task", script = ["this_does_not_exist"] }
 
 # exit types
 exit = { script = "maid 'exit %{arg.1}'" }
-"exit bad" = { script = ["exit_test 0", "exit_test 1", "exit_test 2"], retry = 3, hide = true }
-"exit good" = { script = ["exit_test 2", "exit_test 1", "exit_test 0"], retry = 3, hide = true }
+"exit bad" = { script = ["exit_test 0", "exit_test 1", "exit_test 2"], hide = true }
+"exit good" = { script = ["exit_test 2", "exit_test 1", "exit_test 0"], hide = true }

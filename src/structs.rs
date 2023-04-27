@@ -33,7 +33,6 @@ pub struct Address {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Tasks {
     pub script: Value,
-    pub retry: Option<i32>,
     pub hide: Option<bool>,
     pub path: Option<String>,
     pub info: Option<String>,
