@@ -46,7 +46,7 @@ buildall = { info = "build all", script = ["rm -rf build", "mkdir build", "maid 
 # test dependencies
 test = { script = "echo hello world", depends = ["dep1", "dep2"] }
 dep1 = { script = "sleep 3", hide = true }
-dep2 = { script = "sleep 3", hide = true }
+dep2 = { script = "sleep 2", hide = true }
 
 # other tests
 hidden = { script = "echo hidden", hide = true }
@@ -54,6 +54,6 @@ debug = { info = "debug env", path="src", script = ["echo %{env.BOOL}", "echo %{
 broken = { info = "bad task", script = ["this_does_not_exist"] }
 
 # exit types
-"exit bad" = { script = ["exit_test 0", "exit_test 1", "exit_test 2"] }
-"exit good" = { script = ["exit_test 2", "exit_test 1", "exit_test 0"] }
-"exit" = { script = "exit_test 1", retry = 3 }
+exit = { script = "maid 'exit %{arg.1}'" }
+"exit bad" = { script = ["exit_test 0", "exit_test 1", "exit_test 2"], retry = 3, hide = true }
+"exit good" = { script = ["exit_test 2", "exit_test 1", "exit_test 0"], retry = 3, hide = true }

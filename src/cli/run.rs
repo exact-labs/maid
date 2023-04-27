@@ -82,6 +82,7 @@ fn run_script(runner: Runner, mut retry_times: i32) {
         let exit_code = helpers::status::code(&status);
         let success = helpers::status::success(&status);
 
+        // fix this, it is very broken (loops wrong and doesnt show message)
         if !success && retry >= 1 {
             print!("\n");
 

@@ -5,9 +5,8 @@ use crate::task;
 use colored::Colorize;
 use fs_extra::dir::get_size;
 use human_bytes::human_bytes;
-use indicatif::{ProgressBar, ProgressStyle};
-use macros_rs::{crashln, string, ternary};
-use std::env;
+use macros_rs::{crashln, fmtstr, string, ternary};
+use std::{env, time::Instant};
 
 pub fn info(path: &String) {
     let values = helpers::maidfile::merge(path);
@@ -49,19 +48,30 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
             crashln!("Maid could not find the task '{task}'. Does it exist?");
         }
 
-        for item in match &values.tasks[task].depends {
-            Some(deps) => deps.clone(),
-            None => vec![],
-        } {
-            let pb = ProgressBar::new_spinner();
-            pb.enable_steady_tick(std::time::Duration::from_millis(80));
-            pb.set_style(ProgressStyle::with_template("{spinner:.yellow}{msg}").unwrap().tick_strings(&[
-                "[    ] ", "[=   ] ", "[==  ] ", "[=== ] ", "[ ===] ", "[  ==] ", "[   =] ", "[    ] ", "[   =] ", "[  ==] ", "[ ===] ", "[====] ", "[=== ] ", "[==  ] ", "[=   ] ", "",
-            ]));
-            pb.set_message(format!("{} {item}", "running dependency".bright_yellow()));
-            exec(&item, args, path, true, true, log_level);
-            pb.finish_with_message(format!("{} {} {item}", helpers::string::check_icon(), "finished dependency".bright_green()));
-        }
+        match &values.tasks[task].depends {
+            Some(deps) => {
+                let start = Instant::now();
+                let ticks = vec!["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+                let template = fmtstr!("{{prefix:.white}} {{spinner:.yellow}}{{msg}} {}", "({elapsed})".bright_cyan());
+                let pb = task::progress::init(ticks, template, 80);
+
+                for (index, item) in deps.iter().enumerate() {
+                    pb.set_prefix(format!("[{}/{}]", index + 1, deps.len()));
+                    pb.set_message(fmtstr!("{} {item}", "running dependency".bright_yellow()));
+                    exec(&item, args, path, true, true, log_level);
+                }
+
+                pb.suspend(|| {
+                    println!(
+                        "{} {} in {}\n",
+                        helpers::string::check_icon(),
+                        format!("finished {} dependencies", deps.len()).bright_green(),
+                        format!("{:.2?}", start.elapsed()).yellow()
+                    )
+                });
+            }
+            None => {}
+        };
 
         let cache = match &values.tasks[task].cache {
             Some(cache) => cache.clone(),

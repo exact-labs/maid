@@ -176,6 +176,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "colored-macro"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9491768bc6a858ba094101f6986ab540b48028abbc5a577478f2d25ea643e8e4"
+dependencies = [
+ "css-color",
+ "quote",
+ "syn 2.0.15",
+]
+
+[[package]]
 name = "console"
 version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -298,6 +309,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "css-color"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d101c65424c856131a3cb818da2ddde03500dc3656972269cdf79f018ef77eb4"
+
+[[package]]
 name = "data-encoding"
 version = "2.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -394,6 +411,7 @@ dependencies = [
  "clap",
  "clap-verbosity-flag",
  "colored",
+ "colored-macro",
  "data-encoding",
  "env_logger",
  "fs_extra",
@@ -1013,9 +1031,9 @@ checksum = "830b246a0e5f20af87141b25c173cd1b609bd7779a4617d6ec582abaf90870f3"
 
 [[package]]
 name = "once_cell"
-version = "1.17.0"
+version = "1.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f61fba1741ea2b3d6a1e3178721804bb716a68a6aeba1149b5d52e3d464ea66"
+checksum = "b7e5500299e16ebb147ae15a00a942af264cf3688f47923b8fc2cd5858f23ad3"
 
 [[package]]
 name = "openssl"
