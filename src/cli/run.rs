@@ -10,6 +10,7 @@ use human_bytes::human_bytes;
 use macros_rs::{crashln, string};
 use serde_json::json;
 use std::io::Error;
+use std::path::Path;
 use std::process::{Command, ExitStatus, Stdio};
 use std::time::Instant;
 use text_placeholder::Template;
@@ -100,8 +101,8 @@ fn run_script(runner: Runner) {
         if success {
             println!("\n{} {}", helpers::string::check_icon(), "finished task successfully".bright_green());
             if !cache.path.trim().is_empty() && !cache.target.trim().is_empty() {
-                let cache_file = format!(".maid/cache/{}/target/{}", runner.name, cache.target.clone());
-                match std::fs::copy(cache.target.clone(), cache_file.clone()) {
+                let cache_file = format!(".maid/cache/{}/target/{}", runner.name, Path::new(&cache.target.clone()).file_name().unwrap().to_str().unwrap());
+                match std::fs::copy(Path::new(&cache.target.clone()), cache_file.clone()) {
                     Ok(_) => {
                         println!(
                             "{} ({})",
@@ -112,6 +113,7 @@ fn run_script(runner: Runner) {
                     }
                     Err(err) => {
                         log::warn!("{err}");
+                        log::debug!("path: {}", cache.target.clone());
                         crashln!("Cannot save target file.");
                     }
                 };

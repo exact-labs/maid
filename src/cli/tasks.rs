@@ -1,28 +1,15 @@
 use crate::cli;
-use crate::parse;
+use crate::helpers;
 use crate::structs;
 use crate::table;
 
 use colored::Colorize;
 use inquire::Select;
-use macros_rs::{crashln, string, ternary};
-use merge_struct::merge;
+use macros_rs::{string, ternary};
 use text_placeholder::Template;
 
 pub fn json(path: &String, args: &Vec<String>, hydrate: &bool) {
-    let mut values = parse::file::read_maidfile(path);
-    let imported_values = parse::import::push(values.import.clone());
-
-    for import in imported_values.iter() {
-        values = match merge(&values, &import) {
-            Ok(merge) => merge,
-            Err(err) => {
-                log::warn!("{err}");
-                crashln!("Unable to import tasks.");
-            }
-        };
-    }
-
+    let values = helpers::maidfile::merge(path);
     let json = values.clone().to_json();
     let table = table::create(values.clone(), args);
     let hydrated_json = Template::new_with_placeholder(&json, "%{", "}").fill_with_hashmap(&table);
@@ -31,7 +18,7 @@ pub fn json(path: &String, args: &Vec<String>, hydrate: &bool) {
 }
 
 pub fn list(path: &String, silent: bool, log_level: Option<log::Level>) {
-    let values = parse::file::read_maidfile(path);
+    let values = helpers::maidfile::merge(path);
     let mut options: Vec<_> = values
         .tasks
         .iter()

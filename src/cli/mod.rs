@@ -6,7 +6,7 @@ use colored::Colorize;
 use fs_extra::dir::get_size;
 use human_bytes::human_bytes;
 use macros_rs::{crashln, fmtstr, string, ternary};
-use std::{env, time::Instant};
+use std::{env, path::Path, time::Instant};
 
 pub fn info(path: &String) {
     let values = helpers::maidfile::merge(path);
@@ -94,7 +94,7 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
 
             let hash = task::cache::create_hash(&cache.path);
             let config_path = format!(".maid/cache/{task}/{}.toml", task);
-            let cache_file = format!(".maid/cache/{task}/target/{}", cache.target.clone());
+            let cache_file = format!(".maid/cache/{task}/target/{}", Path::new(&cache.target.clone()).file_name().unwrap().to_str().unwrap());
 
             if !helpers::Exists::file(config_path.clone()).unwrap() {
                 match std::fs::write(
@@ -128,7 +128,7 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
                     format!("{}", human_bytes(get_size(cache_file.clone()).unwrap() as f64).white())
                 );
 
-                match std::fs::copy(cache_file, cache.target.clone()) {
+                match std::fs::copy(Path::new(&cache_file), cache.target.clone()) {
                     Ok(_) => log::debug!("copied target file {}", cache.target.clone()),
                     Err(err) => {
                         log::warn!("{err}");
