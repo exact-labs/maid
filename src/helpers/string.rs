@@ -9,6 +9,10 @@ pub fn warn_icon() -> ColoredString {
     "⚠".yellow()
 }
 
+pub fn seperator() -> ColoredString {
+    ":".white()
+}
+
 pub fn arrow_icon() -> ColoredString {
     "»".white()
 }

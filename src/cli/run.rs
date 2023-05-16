@@ -123,6 +123,25 @@ fn run_script(runner: Runner) {
             println!("\n{} {} {}", helpers::string::cross_icon(), "exited with status code".bright_red(), format!("{}", exit_code).red());
             println!("{} took {}", runner.name.white(), format!("{:.2?}", start.elapsed()).yellow());
         }
+    } else {
+        if success {
+            if !cache.path.trim().is_empty() && !cache.target.trim().is_empty() {
+                let cache_file = format!(".maid/cache/{}/target/{}", runner.name, Path::new(&cache.target.clone()).file_name().unwrap().to_str().unwrap());
+                match std::fs::copy(Path::new(&cache.target.clone()), cache_file.clone()) {
+                    Ok(_) => println!(
+                        "{} {}{}{}",
+                        helpers::string::add_icon(),
+                        format!("{}", cache.target.clone()).bright_green(),
+                        helpers::string::seperator(),
+                        format!("{}", human_bytes(get_size(cache_file.clone()).unwrap() as f64).bright_cyan())
+                    ),
+                    Err(err) => {
+                        log::error!("{err}");
+                        log::debug!("path: {}", cache.target.clone());
+                    }
+                };
+            }
+        }
     }
 }
 
