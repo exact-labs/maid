@@ -1,0 +1,24 @@
+# hidden tasks (can also hide with `hide = true`)
+[tasks._build_macos]
+script = [
+"cargo build --release", 
+"mv target/release/exact-maid build/maid",
+"zip build/maid_%{env.VERSION}_darwin_amd64.zip build/maid",
+"rm build/maid",
+]
+
+[tasks._build_linux]
+script = [
+"cargo build --release --target x86_64-unknown-linux-musl", 
+"mv target/release/exact-maid build/maid",
+"zip build/maid_%{env.VERSION}_linux_amd64.zip build/maid",
+"rm build/maid",
+]
+
+[tasks._build_windows]
+script = [
+"cargo build --release --target x86_64-pc-windows-gnu", 
+"mv target/release/exact-maid build/maid",
+"zip build/maid_%{env.VERSION}_windows_amd64.zip build/maid",
+"rm build/maid",
+]

@@ -1,0 +1,32 @@
+# import tasks and enviroment from other files
+import = ["scripts/build.toml", "scripts/test.toml"]
+
+# build on a remote server
+[project.server]
+address = { ip = "localhost", port = 3500, ssl = false }
+token = "test_token"
+
+# global enviroment
+[env]
+BOOL = false
+STRING = 'test'
+TYPE = '%{dir.home} %{env.STRING} %{arg.1}'
+ARR = ['hello', 'world']
+VERSION='0.7.0'
+
+[tasks.build]
+info = "Build binaries"
+cache = { path = "crates/maid", target = ["bin/maid", "bin/exit_test", "bin/maid_server"] }
+script = [
+   "maid clean",
+   "cargo build --release", 
+   "mv target/release/exact-maid bin/maid",
+   "mv target/release/maid_server bin/maid_server",
+   "mv target/release/exit_test bin/exit_test"
+]
+
+# basic task definition 
+[tasks]
+clean = { info = "Clean binary files", script = ["rimraf bin", "mkdir bin"] }
+crates = { path="crates/server", info = "build maid crates", script = ["cargo build --release", "mv target/release/maid_server ."] }
+buildall = { info = "build all", script = ["rm -rf build", "mkdir build", "maid _build_macos", "maid _build_linux", "maid _build_windows"] }
