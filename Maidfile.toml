@@ -16,7 +16,6 @@ VERSION='0.7.0'
 
 [tasks.build]
 info = "Build binaries"
-cache = { path = "crates/maid", target = ["bin/maid", "bin/exit_test", "bin/maid_server"] }
 script = [
    "maid clean",
    "cargo build --release", 
@@ -25,8 +24,16 @@ script = [
    "mv target/release/exit_test bin/exit_test"
 ]
 
+[tasks.build.cache]
+path = "crates/maid"
+target = [
+   "bin/maid", 
+   "bin/exit_test", 
+   "bin/maid_server"
+]
+
 # basic task definition 
 [tasks]
 clean = { info = "Clean binary files", script = ["rimraf bin", "mkdir bin"] }
-crates = { path="crates/server", info = "build maid crates", script = ["cargo build --release", "mv target/release/maid_server ."] }
+install = { info = "Move binary file", script = ["sudo cp bin/maid /usr/local/bin", "echo Copied binary!"], depends = ["build"] }
 buildall = { info = "build all", script = ["rm -rf build", "mkdir build", "maid _build_macos", "maid _build_linux", "maid _build_windows"] }

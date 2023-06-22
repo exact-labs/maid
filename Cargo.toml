@@ -3,6 +3,7 @@ members = [
     "crates/maid/client",
     "crates/maid/server",
     "crates/packages/pretty_number",
+    "crates/packages/global_placeholders",
     "crates/testing/exit_test",
 ]
 
@@ -16,6 +17,7 @@ description = "🔨 An easy to use make alternative."
 [workspace.dependencies]
 # local
 pretty_number = { package = "pretty_number", path = "./crates/packages/pretty_number", version = "0.1.0" }
+global_placeholders = { package = "global_placeholders", path = "./crates/packages/global_placeholders", version = "0.1.0" }
 
 # remote
 clap = { version = "4.3.5", features = ["derive"] }
