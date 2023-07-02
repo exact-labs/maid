@@ -32,7 +32,7 @@ fn digit(n: u16) -> Digit {
     }
 }
 
-/// (up to) 4 digits number
+/// (up to) 4 digit numbers
 pub struct Number {
     thousands: Digit,
     hundreds: Digit,

@@ -8,18 +8,18 @@ const port = 3500;
 const token = '';
 
 app.use('*', logger());
-app.use('/api/*', bearerAuth({ prefix: '', token: 'test_token' }));
+app.use('/api/*', bearerAuth({ token: 'test_token' }));
 
 app.get('/api/health', (c) =>
 	c.json({
-		uptime: '168.44d',
-		version: '0.2.1',
-		engine: 'docker',
+		uptime: { data: 168.44, hue: 'red' },
+		version: { data: '0.2.1', hue: 'bright red' },
+		engine: { data: 'docker', hue: 'yellow' },
 		status: {
-			healthy: true,
-			ping: 36,
-			message: 'All services running',
-			containers: ['build', 'build/ui'],
+			ping: { data: 36, hue: 'green' },
+			healthy: { data: 'yes', hue: 'cyan' },
+			message: { data: 'All services running', hue: 'bright blue' },
+			containers: { data: ['build', 'build/ui'], hue: 'magenta' },
 		},
 	})
 );

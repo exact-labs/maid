@@ -620,8 +620,6 @@ dependencies = [
 name = "global_placeholders"
 version = "0.1.0"
 dependencies = [
- "lazy_static",
- "once_cell",
  "parking_lot",
 ]
 
