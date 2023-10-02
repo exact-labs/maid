@@ -1,6 +1,10 @@
 # import tasks and enviroment from other files
 import = ["scripts/build.toml", "scripts/test.toml"]
 
+[project]
+name = "maid"
+version = "0.7.5"
+
 # build on a remote server
 [project.server]
 address = { ip = "localhost", port = 3500, ssl = false }

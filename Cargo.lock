@@ -454,7 +454,7 @@ dependencies = [
 
 [[package]]
 name = "exact-maid"
-version = "0.7.0"
+version = "0.7.5"
 dependencies = [
  "anyhow",
  "clap",

@@ -2,4 +2,4 @@ env:
   E: e
 tasks:
   e:
-    script: 'echo %{env.E}'
+    script: "echo %{env.E}"

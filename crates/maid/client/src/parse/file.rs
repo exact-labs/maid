@@ -58,7 +58,7 @@ fn find_file(starting_directory: &Path, filename: &String) -> Option<PathBuf> {
             break toml.path;
         }
 
-        if !(path.pop() && path.pop()) {
+        if !path.pop() {
             break None;
         }
     }
@@ -155,6 +155,4 @@ pub fn read_maidfile_with_error(filename: &String, error: &str) -> Maidfile {
     }
 }
 
-pub fn read_maidfile(filename: &String) -> Maidfile {
-    read_maidfile_with_error(filename, "Cannot find maidfile. Does it exist?")
-}
+pub fn read_maidfile(filename: &String) -> Maidfile { read_maidfile_with_error(filename, "Cannot find maidfile. Does it exist?") }

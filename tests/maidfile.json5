@@ -1,21 +1,7 @@
 {
-	env: {
-		ARR: ['hello', 'world'],
-		BOOL: false,
-		STRING: 'test',
-		TYPE: '%{dir.home} %{env.STRING} %{arg.1}',
-		VERSION: '0.3.0',
-	},
-	project: {
-		server: {
-			token: 'test_token',
-			address: {
-				ip: 'localhost',
-				port: 3500,
-				ssl: false,
-			},
-		},
-	},
+	import: ['scripts/build.toml', 'scripts/test.toml'],
+	env: { ARR: ['hello', 'world'], BOOL: false, STRING: 'test', TYPE: '%{dir.home} %{env.STRING} %{arg.1}', VERSION: '0.7.0' },
+	project: { name: 'maid', version: '0.7.5', server: { address: { ip: 'localhost', port: 3500, ssl: false }, token: 'test_token' } },
 	tasks: {
 		_build_linux: {
 			script: [
@@ -24,6 +10,12 @@
 				'zip build/maid_%{env.VERSION}_linux_amd64.zip build/maid',
 				'rm build/maid',
 			],
+			hide: null,
+			path: null,
+			info: null,
+			cache: null,
+			remote: null,
+			depends: null,
 		},
 		_build_macos: {
 			script: [
@@ -32,6 +24,12 @@
 				'zip build/maid_%{env.VERSION}_darwin_amd64.zip build/maid',
 				'rm build/maid',
 			],
+			hide: null,
+			path: null,
+			info: null,
+			cache: null,
+			remote: null,
+			depends: null,
 		},
 		_build_windows: {
 			script: [
@@ -40,35 +38,40 @@
 				'zip build/maid_%{env.VERSION}_windows_amd64.zip build/maid',
 				'rm build/maid',
 			],
+			hide: null,
+			path: null,
+			info: null,
+			cache: null,
+			remote: null,
+			depends: null,
 		},
-		broken: {
-			info: 'bad task',
-			script: ['this_does_not_exist'],
-		},
+		broken: { script: ['this_does_not_exist'], hide: null, path: null, info: 'bad task', cache: null, remote: null, depends: null },
 		build: {
-			info: 'build maid',
-			script: ['cargo build --release', 'mv target/release/exact-maid maid'],
-			cache: {
-				path: 'src',
-				target: 'maid',
-			},
+			script: [
+				'maid clean -q',
+				'cargo build --release',
+				'mv target/release/exact-maid bin/maid',
+				'mv target/release/maid_server bin/maid_server',
+				'mv target/release/exit_test bin/exit_test',
+			],
+			hide: null,
+			path: null,
+			info: 'Build binaries',
+			cache: { path: 'crates/maid', target: ['bin/maid', 'bin/exit_test', 'bin/maid_server'] },
+			remote: null,
+			depends: null,
 		},
 		buildall: {
-			info: 'build all',
 			script: ['rm -rf build', 'mkdir build', 'maid _build_macos', 'maid _build_linux', 'maid _build_windows'],
+			hide: null,
+			path: null,
+			info: 'build all',
+			cache: null,
+			remote: null,
+			depends: null,
 		},
-		clean: {
-			info: 'remove binary',
-			script: 'rm maid',
-		},
-		crates: {
-			info: 'build maid crates',
-			path: 'crates/server',
-			script: ['cargo build --release', 'mv target/release/maid_server .'],
-		},
+		clean: { script: ['rimraf bin', 'mkdir bin'], hide: null, path: null, info: 'Clean binary files', cache: null, remote: null, depends: null },
 		debug: {
-			info: 'debug env',
-			path: 'src',
 			script: [
 				'echo %{env.BOOL}',
 				'echo %{env.STRING}',
@@ -80,31 +83,44 @@
 				'echo %{os.platform}',
 				'echo %{os.arch}',
 			],
+			hide: null,
+			path: 'src',
+			info: 'debug env',
+			cache: null,
+			remote: null,
+			depends: null,
 		},
-		dep1: {
-			hide: true,
-			script: 'sleep 3',
-		},
-		dep2: {
-			hide: true,
-			script: 'sleep 3',
-		},
-		exit: {
-			script: 'exit_test 1',
-		},
+		dep1: { script: 'sleep 3', hide: true, path: null, info: null, cache: null, remote: null, depends: null },
+		dep2: { script: 'sleep 2', hide: true, path: null, info: null, cache: null, remote: null, depends: null },
+		exit: { script: "maid 'exit %{arg.1}'", hide: null, path: null, info: null, cache: null, remote: null, depends: null },
 		'exit bad': {
 			script: ['exit_test 0', 'exit_test 1', 'exit_test 2'],
+			hide: true,
+			path: null,
+			info: null,
+			cache: null,
+			remote: null,
+			depends: null,
 		},
 		'exit good': {
 			script: ['exit_test 2', 'exit_test 1', 'exit_test 0'],
-		},
-		hidden: {
 			hide: true,
-			script: 'echo hidden',
+			path: null,
+			info: null,
+			cache: null,
+			remote: null,
+			depends: null,
 		},
-		test: {
-			depends: ['dep1', 'dep2'],
-			script: 'echo hello world',
+		hidden: { script: 'echo hidden', hide: true, path: null, info: null, cache: null, remote: null, depends: null },
+		install: {
+			script: ['sudo cp bin/maid /usr/local/bin', 'echo Copied binary!'],
+			hide: null,
+			path: null,
+			info: 'Move binary file',
+			cache: null,
+			remote: null,
+			depends: ['build'],
 		},
+		test: { script: 'echo hello world', hide: null, path: null, info: null, cache: null, remote: null, depends: ['dep1', 'dep2', 'exit bad'] },
 	},
 }
