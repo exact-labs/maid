@@ -236,17 +236,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "colored-macro"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9491768bc6a858ba094101f6986ab540b48028abbc5a577478f2d25ea643e8e4"
-dependencies = [
- "css-color",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "console"
 version = "0.15.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -369,12 +358,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "css-color"
-version = "0.2.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d101c65424c856131a3cb818da2ddde03500dc3656972269cdf79f018ef77eb4"
-
-[[package]]
 name = "data-encoding"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -460,7 +443,6 @@ dependencies = [
  "clap",
  "clap-verbosity-flag",
  "colored",
- "colored-macro",
  "data-encoding",
  "env_logger",
  "fs_extra",
