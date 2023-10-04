@@ -12,8 +12,6 @@ use clap::{Parser, Subcommand};
 use clap_verbosity_flag::Verbosity;
 use std::path::Path;
 
-// add remote build server - dependencies required for builds (build requires clean etc)
-
 #[derive(Parser)]
 #[command(version)]
 struct Cli {
@@ -35,6 +33,13 @@ enum Commands {
         #[command(subcommand)]
         internal: Butler,
     },
+    /// All remote maid commands
+    Remote {
+        #[arg(default_value = "", hide_default_value = true)]
+        task: Vec<String>,
+        #[command(subcommand)]
+        server: Option<Remote>,
+    },
 }
 
 #[derive(Subcommand)]
@@ -43,8 +48,6 @@ enum Butler {
     Tasks,
     /// Get Project Info
     Info,
-    /// Test server specified in maidfile
-    Connect,
     /// Create new maidfile
     Init,
     /// Clear maid cache
@@ -60,6 +63,16 @@ enum Butler {
     },
 }
 
+#[derive(Subcommand)]
+enum Remote {
+    /// List all remote maidfile tasks
+    List,
+    /// Test server specified in maidfile
+    Connect,
+    /// Clear remote maid cache
+    Clean,
+}
+
 fn main() {
     let cli = Cli::parse();
 
@@ -71,12 +84,17 @@ fn main() {
             Butler::Json { hydrate } => cli::tasks::json(&cli.path, &cli.task, hydrate),
             Butler::Info => cli::info(&cli.path),
             Butler::Clean => cli::butler::clean(),
-            Butler::Connect => server::cli::connect(&cli.path),
             Butler::Init => cli::butler::init(),
             Butler::Watch => cli::butler::watch(Path::new("src")),
             Butler::Update => cli::butler::update(),
-            Butler::Tasks => cli::tasks::list(&cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),
+            Butler::Tasks => cli::tasks::List::all(&cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),
         },
-        None => cli::exec(cli.task[0].trim(), &cli.task, &cli.path, cli.verbose.is_silent(), false, cli.verbose.log_level()),
+        Some(Commands::Remote { task, server }) => match server {
+            Some(Remote::Connect) => server::cli::connect(&cli.path),
+            Some(Remote::Clean) => server::cli::connect(&cli.path),
+            Some(Remote::List) => cli::tasks::List::remote(&cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),
+            None => cli::exec(task[0].trim(), &task, &cli.path, cli.verbose.is_silent(), false, false, cli.verbose.log_level()),
+        },
+        None => cli::exec(cli.task[0].trim(), &cli.task, &cli.path, cli.verbose.is_silent(), false, false, cli.verbose.log_level()),
     }
 }

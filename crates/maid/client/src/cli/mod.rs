@@ -36,11 +36,11 @@ pub fn info(path: &String) {
     );
 }
 
-pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep: bool, log_level: Option<log::Level>) {
+pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep: bool, is_remote: bool, log_level: Option<log::Level>) {
     log::info!("Starting maid {}", env!("CARGO_PKG_VERSION"));
 
     if task.is_empty() {
-        tasks::list(path, silent, log_level)
+        tasks::List::all(path, silent, log_level)
     } else {
         let values = helpers::maidfile::merge(path);
         let cwd = &helpers::file::get_current_working_dir();
@@ -59,7 +59,7 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
                 for (index, item) in deps.iter().enumerate() {
                     pb.set_prefix(format!("[{}/{}]", index + 1, deps.len()));
                     pb.set_message(fmtstr!("{} {item}", "running dependency".bright_yellow()));
-                    exec(&item, args, path, true, true, log_level);
+                    exec(&item, args, path, true, true, is_remote, log_level);
                 }
 
                 pb.suspend(|| {
