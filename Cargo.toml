@@ -21,7 +21,9 @@ pretty_number = { package = "pretty_number", path = "./crates/packages/pretty_nu
 global_placeholders = { package = "global_placeholders", path = "./crates/packages/global_placeholders", version = "0.1.0" }
 
 # remote
-clap = { version = "4.3.5", features = ["derive"] }
-clap-verbosity-flag = "2.0.1"
+log = "0.4.20"
+colored = "2.0.4"
 env_logger = "0.10.0"
-log = "0.4.19"
+clap-verbosity-flag = "2.0.1"
+clap = { version = "4.4.6", features = ["derive"] }
+reqwest = { version = "0.11.22", features = ["json", "blocking"] }

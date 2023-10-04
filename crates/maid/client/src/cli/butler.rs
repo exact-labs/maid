@@ -15,7 +15,7 @@ fn create_error(name: &str) {
 
 pub fn watch(path: &Path) {
     let (tx, rx) = std::sync::mpsc::channel();
-    let mut debouncer = new_debouncer(Duration::from_secs(1), None, tx).unwrap();
+    let mut debouncer = new_debouncer(Duration::from_secs(1), tx).unwrap();
 
     debouncer.watcher().watch(path, RecursiveMode::Recursive).unwrap();
     for events in rx {
