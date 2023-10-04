@@ -1,5 +1,0 @@
-env:
-  E: e
-tasks:
-  e:
-    script: "echo %{env.E}"

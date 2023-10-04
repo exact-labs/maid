@@ -1,5 +1,0 @@
-[env]
-OTHER = "other world"
-
-[tasks.other]
-script = "echo %{env.OTHER}"

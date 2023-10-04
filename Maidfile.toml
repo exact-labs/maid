@@ -29,12 +29,17 @@ script = [
 ]
 
 [tasks.build.cache]
-path = "crates/maid"
+path = "crates"
 target = [
    "bin/maid", 
    "bin/exit_test", 
    "bin/maid_server"
 ]
+
+[tasks.build.remote]
+push = ["crates", "Cargo.toml", "Cargo.lock"]
+pull = ["maid"]
+image = "rust"
 
 # basic task definition 
 [tasks]
