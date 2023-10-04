@@ -93,7 +93,7 @@ fn main() {
             Some(Remote::Connect) => server::cli::connect(&cli.path),
             Some(Remote::Clean) => server::cli::connect(&cli.path),
             Some(Remote::List) => cli::tasks::List::remote(&cli.path, cli.verbose.is_silent(), cli.verbose.log_level()),
-            None => cli::exec(task[0].trim(), &task, &cli.path, cli.verbose.is_silent(), false, false, cli.verbose.log_level()),
+            None => cli::exec(task[0].trim(), &task, &cli.path, cli.verbose.is_silent(), false, true, cli.verbose.log_level()),
         },
         None => cli::exec(cli.task[0].trim(), &cli.task, &cli.path, cli.verbose.is_silent(), false, false, cli.verbose.log_level()),
     }

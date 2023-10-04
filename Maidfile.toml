@@ -7,7 +7,7 @@ version = "0.7.5"
 
 # build on a remote server
 [project.server]
-address = { ip = "localhost", port = 3500, ssl = false }
+address = { host = "localhost", port = 3500, ssl = false }
 token = "test_token"
 
 # global enviroment

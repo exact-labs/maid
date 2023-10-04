@@ -1,12 +1,12 @@
 use crate::structs::Maidfile;
 use macros_rs::{string, ternary};
 
-pub fn address(values: Maidfile) -> String {
+pub fn address(values: &Maidfile) -> String {
     match &values.project {
         Some(project) => match &project.server {
             Some(server) => {
                 let prefix = ternary!(server.address.ssl, "https", "http");
-                format!("{}://{}:{}", prefix, server.address.ip, server.address.port)
+                format!("{}://{}:{}", prefix, server.address.host, server.address.port)
             }
             None => string!(""),
         },
@@ -14,17 +14,30 @@ pub fn address(values: Maidfile) -> String {
     }
 }
 
-pub fn ip(values: Maidfile) -> String {
+pub fn websocket(values: &Maidfile) -> String {
     match &values.project {
         Some(project) => match &project.server {
-            Some(server) => server.address.ip.clone(),
+            Some(server) => {
+                let prefix = ternary!(server.address.ssl, "wss", "ws");
+                format!("{}://{}:{}", prefix, server.address.host, server.address.port)
+            }
             None => string!(""),
         },
         None => string!(""),
     }
 }
 
-pub fn token(values: Maidfile) -> String {
+pub fn host(values: &Maidfile) -> String {
+    match &values.project {
+        Some(project) => match &project.server {
+            Some(server) => server.address.host.clone(),
+            None => string!(""),
+        },
+        None => string!(""),
+    }
+}
+
+pub fn token(values: &Maidfile) -> String {
     match &values.project {
         Some(project) => match &project.server {
             Some(server) => server.token.clone(),
@@ -32,4 +45,13 @@ pub fn token(values: Maidfile) -> String {
         },
         None => string!(""),
     }
+}
+
+pub fn all(maidfile: Maidfile) -> (String, String, String, String) {
+    let host = host(&maidfile);
+    let server = address(&maidfile);
+    let websocket = websocket(&maidfile);
+    let token = token(&maidfile);
+
+    (server, websocket, token, host)
 }

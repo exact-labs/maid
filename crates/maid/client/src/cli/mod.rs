@@ -1,4 +1,5 @@
 use crate::helpers;
+use crate::server;
 use crate::structs::{Cache, CacheConfig, Task};
 use crate::task;
 
@@ -84,7 +85,7 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
             None => cwd,
         };
 
-        if !cache.path.trim().is_empty() && !cache.target.is_empty() {
+        if !cache.path.trim().is_empty() && !cache.target.is_empty() && !is_remote {
             if !helpers::Exists::folder(global!("maid.cache_dir", task)).unwrap() {
                 std::fs::create_dir_all(global!("maid.cache_dir", task)).unwrap();
                 log::debug!("created maid cache dir");
@@ -154,6 +155,7 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
             }
         };
 
+        log::debug!("Is remote?: {is_remote}");
         log::debug!("Task path: {task_path}");
         log::debug!("Working dir: {cwd}");
         log::debug!("Started task: {task}");
@@ -166,15 +168,29 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
             )
         }
 
-        run::task(Task {
-            maidfile: values.clone(),
-            name: string!(task),
-            script: values.tasks[task].script.clone(),
-            path: task_path.clone(),
-            args: args.clone(),
-            silent,
-            is_dep,
-        });
+        if is_remote {
+            server::cli::remote(Task {
+                maidfile: values.clone(),
+                name: string!(task),
+                remote: values.tasks[task].remote.clone(),
+                script: values.tasks[task].script.clone(),
+                path: task_path.clone(),
+                args: args.clone(),
+                silent,
+                is_dep,
+            });
+        } else {
+            run::task(Task {
+                maidfile: values.clone(),
+                name: string!(task),
+                remote: None,
+                script: values.tasks[task].script.clone(),
+                path: task_path.clone(),
+                args: args.clone(),
+                silent,
+                is_dep,
+            });
+        }
     }
 }
 
