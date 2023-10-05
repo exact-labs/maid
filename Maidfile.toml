@@ -37,12 +37,16 @@ target = [
 ]
 
 [tasks.build.remote]
-push = ["crates", "Cargo.toml", "Cargo.lock"]
-pull = ["maid"]
 image = "rust"
+push = ["crates", "Cargo.toml", "Cargo.lock"]
+pull = [
+   "bin/maid", 
+   "bin/exit_test", 
+   "bin/maid_server"
+]
 
 # basic task definition 
 [tasks]
-clean = { info = "Clean binary files", script = ["rimraf bin", "mkdir bin"] }
+clean = { info = "Clean binary files", script = ["rm -rf bin", "mkdir bin"] }
 install = { info = "Move binary file", script = ["sudo cp bin/maid /usr/local/bin", "echo Copied binary!"], depends = ["build"] }
 buildall = { info = "build all", script = ["rm -rf build", "mkdir build", "maid _build_macos", "maid _build_linux", "maid _build_windows"] }

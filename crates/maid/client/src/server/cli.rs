@@ -114,6 +114,12 @@ pub fn remote(task: Task) {
         ).fill_with_hashmap(&table::create(task.maidfile.clone(), args)),
     });
 
+    // send build files over ws using a tarfile
+    // get sent container creation command with script below line:121
+    // untar files into container
+    // hydrate any commands like 'maid clean -q' in the script do on line:112
+    // put pull files in tar, pull the tar and unzip locally, then save in cache
+
     socket.send(Message::Text(serde_json::to_string(&connection_data).unwrap())).unwrap();
 
     loop {
