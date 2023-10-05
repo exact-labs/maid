@@ -174,7 +174,6 @@ pub fn task(task: cli::Task) {
     }
 
     run_script(Runner {
-        remote: &None,
         name: &task.name,
         path: &task.path,
         args: &task.args,

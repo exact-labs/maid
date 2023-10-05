@@ -1,14 +1,16 @@
 use crate::helpers;
 use crate::server;
-use crate::structs::{Runner, Task};
+use crate::structs::{Maidfile, Task, Websocket};
+use crate::table;
 
 use colored::Colorize;
-use macros_rs::{crashln, fmtstr};
+use macros_rs::{crashln, fmtstr, string, then};
+use reqwest::blocking::Client;
+use text_placeholder::Template;
+use tungstenite::{client::IntoClientRequest, connect as connectWSS, Message};
 
-pub fn connect(path: &String) {
-    let values = helpers::maidfile::merge(path);
-    let (_, server, _, token) = server::parse::all(values);
-    let client = reqwest::blocking::Client::new();
+pub fn health(client: Client, values: Maidfile) -> server::api::health::Route {
+    let (server, _, token, _, _) = server::parse::all(values);
 
     let response = match client.get(fmtstr!("{server}/api/health")).header("Authorization", fmtstr!("Bearer {token}")).send() {
         Ok(res) => res,
@@ -25,6 +27,14 @@ pub fn connect(path: &String) {
             crashln!("Unable to connect to the maid server. Is the token correct?")
         }
     };
+
+    return body;
+}
+
+pub fn connect(path: &String) {
+    let values = helpers::maidfile::merge(path);
+    let client = Client::new();
+    let body = health(client, values);
 
     println!(
         "{}\n{}\n{}\n{}",
@@ -45,6 +55,7 @@ pub fn connect(path: &String) {
 }
 
 pub fn remote(task: Task) {
+    let args = &task.args.clone();
     let mut script: Vec<&str> = vec![];
 
     if task.script.is_str() {
@@ -71,22 +82,66 @@ pub fn remote(task: Task) {
         helpers::status::error(task.script.type_str())
     }
 
-    let (host, server, websocket, token) = server::parse::all(task.maidfile.clone());
-    let client = reqwest::blocking::Client::new();
+    let client = Client::new();
+    let body = health(client, task.maidfile.clone());
+    let (server, websocket, token, host, port) = server::parse::all(task.maidfile.clone());
 
-    println!("{host}\n{server}\n{token}\n{websocket}");
+    crate::log!("info", "connecting to {host}:{port}");
 
-    println!(
-        "{:#?}",
-        Runner {
-            name: &task.name,
-            path: &task.path,
-            args: &task.args,
-            silent: task.silent,
-            remote: &task.remote,
-            is_dep: task.is_dep,
-            maidfile: &task.maidfile,
-            script,
+    if body.status.healthy.data == "yes" {
+        crate::log!("info", "connected successfully");
+        crate::log!("notice", "{}", body.status.message.data);
+    } else {
+        crate::log!("warning", "failed to connect");
+        crate::log!("notice", "{}", body.status.message.data);
+    }
+
+    let mut request = websocket.into_client_request().expect("Can't connect");
+    request.headers_mut().insert("Authorization", fmtstr!("Bearer {token}").parse().unwrap());
+
+    let (mut socket, response) = connectWSS(request).expect("Can't connect");
+    log::debug!("response code: {}", response.status());
+
+    let connection_data = serde_json::json!({
+        "info": {
+            "name": &task.name,
+            "args": &task.args,
+            "remote": &task.remote,
+            "script": script,
+        },
+        "maidfile": Template::new_with_placeholder(
+            &task.maidfile.clone().to_json(), "%{", "}"
+        ).fill_with_hashmap(&table::create(task.maidfile.clone(), args)),
+    });
+
+    socket.send(Message::Text(serde_json::to_string(&connection_data).unwrap())).unwrap();
+
+    loop {
+        match socket.read() {
+            Ok(json) => match json.to_text() {
+                Ok(string) => match serde_json::from_str::<Websocket>(string) {
+                    Ok(ws) => {
+                        if ws.data["message"] != "" {
+                            let msg = string!(ws.data["message"].as_str().unwrap());
+                            crate::log!(ws.level.as_str(), "{}", msg);
+                        }
+
+                        then!(ws.data["done"] == true, break);
+                    }
+                    Err(err) => {
+                        crate::log!("fatal", "{err}");
+                    }
+                },
+                Err(err) => {
+                    crashln!("{err}");
+                }
+            },
+            Err(err) => {
+                crashln!("{err}");
+            }
         }
-    );
+    }
+
+    // run.rs:96 implement that later
+    println!("\n{} {}", helpers::string::check_icon(), "finished task successfully".bright_green());
 }

@@ -5,6 +5,7 @@ version.workspace = true
 description.workspace = true
 
 [dependencies]
+url.workspace = true
 log.workspace = true
 clap.workspace = true
 reqwest.workspace = true
@@ -35,3 +36,4 @@ strip-ansi-escapes = "0.2.0"
 clap-verbosity-flag = "2.0.1"
 notify-debouncer-mini = "0.4.1"
 human_bytes = { version = "0.4.3", default-features = false }
+tungstenite = { version = "0.20.1", features = ["native-tls"] }

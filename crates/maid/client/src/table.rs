@@ -2,7 +2,7 @@ use crate::helpers;
 use crate::structs::Maidfile;
 
 use colored::Colorize;
-use macros_rs::{errorln, ternary};
+use macros_rs::{errorln, str, ternary};
 use serde_json::json;
 use std::{collections::BTreeMap, collections::HashMap, env};
 use text_placeholder::Template;
@@ -41,7 +41,7 @@ pub fn create(values: Maidfile, args: &Vec<String>) -> HashMap<&str, &str> {
 
     for (pos, arg) in args.iter().enumerate() {
         log::info!("{} arg.{pos}: '{}'", helpers::string::add_icon(), arg.yellow());
-        table.insert(helpers::string::to_static_str(format!("arg.{pos}")), arg);
+        table.insert(str!(format!("arg.{pos}")), arg);
     }
 
     let user_env = match &values.env {
@@ -52,13 +52,13 @@ pub fn create(values: Maidfile, args: &Vec<String>) -> HashMap<&str, &str> {
     for (key, value) in user_env {
         let value_formatted = ternary!(
             value.to_string().starts_with("\""),
-            helpers::string::trim_start_end(helpers::string::to_static_str(Template::new_with_placeholder(&value.to_string(), "%{", "}").fill_with_hashmap(&table))),
-            helpers::string::to_static_str(Template::new_with_placeholder(&value.to_string(), "%{", "}").fill_with_hashmap(&table))
+            helpers::string::trim_start_end(str!(Template::new_with_placeholder(&value.to_string(), "%{", "}").fill_with_hashmap(&table))).replace("\"", "\\\""),
+            str!(Template::new_with_placeholder(&value.to_string(), "%{", "}").fill_with_hashmap(&table)).replace("\"", "\\\"")
         );
 
-        env::set_var(key, value_formatted);
+        env::set_var(key, value_formatted.clone());
         log::info!("{} env.{key}: '{}'", helpers::string::add_icon(), value_formatted.yellow());
-        table.insert(helpers::string::to_static_str(format!("env.{}", key.clone())), value_formatted);
+        table.insert(str!(format!("env.{}", key.clone())), str!(value_formatted));
     }
 
     log::trace!("{}", json!({ "env": table }));

@@ -34,7 +34,5 @@ impl Maidfile {
 
 impl std::fmt::Display for DisplayTask {
     #[inline]
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(&self.formatted, f)
-    }
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { std::fmt::Display::fmt(&self.formatted, f) }
 }

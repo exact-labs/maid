@@ -160,7 +160,7 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
         log::debug!("Working dir: {cwd}");
         log::debug!("Started task: {task}");
 
-        if !silent {
+        if !silent && !is_remote {
             ternary!(
                 task_path == cwd,
                 println!("{} {}", helpers::string::arrow_icon(), &values.tasks[task].script),

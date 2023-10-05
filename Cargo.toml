@@ -21,6 +21,7 @@ pretty_number = { package = "pretty_number", path = "./crates/packages/pretty_nu
 global_placeholders = { package = "global_placeholders", path = "./crates/packages/global_placeholders", version = "0.1.0" }
 
 # remote
+url = "2.4.1"
 log = "0.4.20"
 colored = "2.0.4"
 env_logger = "0.10.0"
