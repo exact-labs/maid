@@ -10,9 +10,10 @@ use text_placeholder::Template;
 use tungstenite::{client::IntoClientRequest, connect as connectWSS, Message};
 
 pub fn health(client: Client, values: Maidfile) -> server::api::health::Route {
-    let (server, _, token, _, _) = server::parse::all(values);
+    let address = server::parse::address(&values);
+    let token = server::parse::token(&values);
 
-    let response = match client.get(fmtstr!("{server}/api/health")).header("Authorization", fmtstr!("Bearer {token}")).send() {
+    let response = match client.get(fmtstr!("{address}/api/health")).header("Authorization", fmtstr!("Bearer {token}")).send() {
         Ok(res) => res,
         Err(err) => {
             log::warn!("{err}");
@@ -84,7 +85,7 @@ pub fn remote(task: Task) {
 
     let client = Client::new();
     let body = health(client, task.maidfile.clone());
-    let (server, websocket, token, host, port) = server::parse::all(task.maidfile.clone());
+    let (_, websocket, token, host, port) = server::parse::all(task.maidfile.clone());
 
     crate::log!("info", "connecting to {host}:{port}");
 
@@ -122,28 +123,49 @@ pub fn remote(task: Task) {
 
     socket.send(Message::Text(serde_json::to_string(&connection_data).unwrap())).unwrap();
 
-    loop {
-        match socket.read() {
-            Ok(json) => match json.to_text() {
-                Ok(string) => match serde_json::from_str::<Websocket>(string) {
-                    Ok(ws) => {
-                        if ws.data["message"] != "" {
-                            let msg = string!(ws.data["message"].as_str().unwrap());
-                            crate::log!(ws.level.as_str(), "{}", msg);
-                        }
+    //fix this mess
 
-                        then!(ws.data["done"] == true, break);
+    /*v2? */
+    //     loop {
+    //         let result = socket
+    //             .read()
+    //             .and_then(|json| json.to_text().and_then(|string| serde_json::from_str::<Websocket>(&string).map_err(|_| string.into())));
+    //
+    //         match result {
+    //             Ok(ws) => {
+    //                 if let Some(msg) = ws.data["message"].as_str() {
+    //                     if !msg.is_empty() {
+    //                         crate::log!(ws.level.as_str(), "{}", msg);
+    //                     }
+    //                 }
+    //
+    //                 if ws.data["done"].as_bool() == Some(true) {
+    //                     break;
+    //                 }
+    //             }
+    //             Err(err) => {
+    //                 crate::log!("fatal", "{}", err);
+    //             }
+    //         }
+    //     }
+
+    loop {
+        let result = socket
+            .read()
+            .and_then(|json| json.to_text().and_then(|string| serde_json::from_str::<Websocket>(&string).map_err(|err| crashln!("{err}"))));
+
+        match result {
+            Ok(ws) => {
+                if let Some(msg) = ws.data["message"].as_str() {
+                    if !msg.is_empty() {
+                        crate::log!(ws.level.as_str(), "{}", msg);
                     }
-                    Err(err) => {
-                        crate::log!("fatal", "{err}");
-                    }
-                },
-                Err(err) => {
-                    crashln!("{err}");
                 }
-            },
+                then!(ws.data["done"] == true, break);
+            }
             Err(err) => {
-                crashln!("{err}");
+                crate::log!("fatal", "{err}");
+                break;
             }
         }
     }

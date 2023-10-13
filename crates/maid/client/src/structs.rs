@@ -1,6 +1,7 @@
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 use std::collections::BTreeMap;
+use std::path::PathBuf;
 use toml::Value as TomlValue;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -79,6 +80,7 @@ pub struct Task {
     pub name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub remote: Option<Remote>,
+    pub project: PathBuf,
     pub script: TomlValue,
     pub path: String,
     pub args: Vec<String>,
@@ -93,6 +95,7 @@ pub struct Runner<'a> {
     pub script: Vec<&'a str>,
     pub path: &'a String,
     pub args: &'a Vec<String>,
+    pub project: &'a PathBuf,
     pub silent: bool,
     pub is_dep: bool,
 }

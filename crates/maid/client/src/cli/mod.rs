@@ -1,4 +1,5 @@
 use crate::helpers;
+use crate::parse;
 use crate::server;
 use crate::structs::{Cache, CacheConfig, Task};
 use crate::task;
@@ -12,6 +13,7 @@ use std::{env, path::Path, time::Instant};
 
 pub fn info(path: &String) {
     let values = helpers::maidfile::merge(path);
+    let project_root = parse::file::find_maidfile_root(path);
 
     let name = match &values.project {
         Some(project) => match project.name.clone() {
@@ -30,10 +32,11 @@ pub fn info(path: &String) {
     };
 
     println!(
-        "{}\n{}\n{}",
+        "{}\n{}\n{}\n{}",
         "Project Info".green().bold(),
         format!(" {}: {}", "- Name".white(), name.bright_yellow()),
-        format!(" {}: {}", "- Version".white(), version.bright_yellow())
+        format!(" {}: {}", "- Version".white(), version.bright_yellow()),
+        format!(" {}: {}", "- Project".white(), project_root.to_string_lossy().bright_yellow())
     );
 }
 
@@ -44,6 +47,7 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
         tasks::List::all(path, silent, log_level)
     } else {
         let values = helpers::maidfile::merge(path);
+        let project_root = parse::file::find_maidfile_root(path);
         let cwd = &helpers::file::get_current_working_dir();
 
         if values.tasks.get(task).is_none() {
@@ -156,6 +160,7 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
         };
 
         log::debug!("Is remote?: {is_remote}");
+        log::debug!("Project dir: {:?}", project_root);
         log::debug!("Task path: {task_path}");
         log::debug!("Working dir: {cwd}");
         log::debug!("Started task: {task}");
@@ -172,6 +177,7 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
             server::cli::remote(Task {
                 maidfile: values.clone(),
                 name: string!(task),
+                project: project_root,
                 remote: values.tasks[task].remote.clone(),
                 script: values.tasks[task].script.clone(),
                 path: task_path.clone(),
@@ -183,6 +189,7 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
             run::task(Task {
                 maidfile: values.clone(),
                 name: string!(task),
+                project: project_root,
                 remote: None,
                 script: values.tasks[task].script.clone(),
                 path: task_path.clone(),

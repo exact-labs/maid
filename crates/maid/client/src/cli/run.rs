@@ -9,6 +9,7 @@ use fs_extra::dir::get_size;
 use human_bytes::human_bytes;
 use macros_rs::{crashln, string};
 use serde_json::json;
+use std::env;
 use std::io::Error;
 use std::path::Path;
 use std::process::{Command, ExitStatus, Stdio};
@@ -42,15 +43,18 @@ fn run_script(runner: Runner) {
         log::trace!("{}", json!({"name": name, "args": args}));
         log::info!("Execute Command: '{name} {}'", args.join(" "));
 
+        let working_dir = runner.project.join(&Path::new(runner.path));
+        match env::set_current_dir(&working_dir) {
+            Ok(_) => {
+                log::info!("Working directory: {:?}", &working_dir);
+            }
+            Err(err) => {
+                crashln!("Failed to set working directory {:?}\nError: {:#?}", &working_dir, err);
+            }
+        };
+
         if runner.is_dep {
-            cmd = match Command::new(&name)
-                .stdout(Stdio::null())
-                .stderr(Stdio::null())
-                .stdin(Stdio::null())
-                .args(args.clone())
-                .current_dir(runner.path)
-                .spawn()
-            {
+            cmd = match Command::new(&name).stdout(Stdio::null()).stderr(Stdio::null()).stdin(Stdio::null()).args(args.clone()).spawn() {
                 Ok(output) => output,
                 Err(err) => {
                     log::warn!("{err}");
@@ -58,14 +62,7 @@ fn run_script(runner: Runner) {
                 }
             };
         } else {
-            cmd = match Command::new(&name)
-                .args(args.clone())
-                .stdout(Stdio::inherit())
-                .stderr(Stdio::inherit())
-                .stdin(Stdio::inherit())
-                .current_dir(runner.path)
-                .spawn()
-            {
+            cmd = match Command::new(&name).args(args.clone()).stdout(Stdio::inherit()).stderr(Stdio::inherit()).stdin(Stdio::inherit()).spawn() {
                 Ok(output) => output,
                 Err(err) => {
                     log::warn!("{err}");
@@ -179,6 +176,7 @@ pub fn task(task: cli::Task) {
         args: &task.args,
         silent: task.silent,
         is_dep: task.is_dep,
+        project: &task.project,
         maidfile: &task.maidfile,
         script,
     });

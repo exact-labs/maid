@@ -18,12 +18,15 @@ fn working_dir() -> PathBuf {
     }
 }
 
-fn find_file(starting_directory: &Path, filename: &String) -> Option<PathBuf> {
+fn find_file(starting_directory: &Path, filename: &String, trace: bool) -> Option<PathBuf> {
     let mut path: PathBuf = starting_directory.clone().into();
     let find_kind = |kind: &str, mut inner: PathBuf| -> Filesystem {
         then!(working_dir() != starting_directory, inner.pop());
         inner.push(Path::new(fmtstr!("{filename}{kind}")));
-        log::trace!("{}", json!({"kind": kind, "path": inner}));
+
+        if trace {
+            log::trace!("{}", json!({"kind": kind, "path": inner}))
+        };
 
         return Filesystem {
             path: Some(inner.clone()),
@@ -128,7 +131,7 @@ fn read_file(path: PathBuf, kind: &str) -> Maidfile {
 
 pub fn read_maidfile_with_error(filename: &String, error: &str) -> Maidfile {
     match env::current_dir() {
-        Ok(path) => match find_file(&path, &filename) {
+        Ok(path) => match find_file(&path, &filename, true) {
             Some(path) => {
                 log::info!("Found maidfile path: {}", path.display());
 
@@ -146,6 +149,26 @@ pub fn read_maidfile_with_error(filename: &String, error: &str) -> Maidfile {
             None => {
                 log::warn!("{error}");
                 crashln!("{error}");
+            }
+        },
+        Err(err) => {
+            log::warn!("{err}");
+            crashln!("Home directory could not found.");
+        }
+    }
+}
+
+pub fn find_maidfile_root(filename: &String) -> PathBuf {
+    match env::current_dir() {
+        Ok(path) => match find_file(&path, &filename, false) {
+            Some(mut path) => {
+                path.pop();
+                log::info!("Found project path: {}", path.display());
+                return path;
+            }
+            None => {
+                log::warn!("Cannot find project root.");
+                crashln!("Cannot find project root.");
             }
         },
         Err(err) => {

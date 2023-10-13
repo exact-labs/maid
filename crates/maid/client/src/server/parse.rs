@@ -57,12 +57,4 @@ pub fn token(values: &Maidfile) -> String {
     }
 }
 
-pub fn all(maidfile: Maidfile) -> (String, String, String, String, i64) {
-    let host = host(&maidfile);
-    let port = port(&maidfile);
-    let server = address(&maidfile);
-    let websocket = websocket(&maidfile);
-    let token = token(&maidfile);
-
-    (server, websocket, token, host, port)
-}
+pub fn all(maidfile: Maidfile) -> (String, String, String, String, i64) { (address(&maidfile), websocket(&maidfile), token(&maidfile), host(&maidfile), port(&maidfile)) }
