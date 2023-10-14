@@ -19,7 +19,7 @@ fn working_dir() -> PathBuf {
 }
 
 fn find_file(starting_directory: &Path, filename: &String, trace: bool) -> Option<PathBuf> {
-    let mut path: PathBuf = starting_directory.clone().into();
+    let mut path: PathBuf = starting_directory.into();
     let find_kind = |kind: &str, mut inner: PathBuf| -> Filesystem {
         then!(working_dir() != starting_directory, inner.pop());
         inner.push(Path::new(fmtstr!("{filename}{kind}")));

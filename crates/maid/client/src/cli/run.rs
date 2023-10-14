@@ -23,7 +23,7 @@ fn run_script(runner: Runner) {
 
     for string in runner.script.clone() {
         let start = Instant::now();
-        let table = table::create(runner.maidfile.clone(), runner.args);
+        let table = table::create(runner.maidfile.clone(), runner.args, runner.project.clone());
         let script = Template::new_with_placeholder(string, "%{", "}").fill_with_hashmap(&table);
         let (name, args) = match script.try_into_args() {
             Ok(result) => {

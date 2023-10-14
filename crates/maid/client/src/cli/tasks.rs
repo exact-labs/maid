@@ -1,5 +1,6 @@
 use crate::cli;
 use crate::helpers;
+use crate::parse;
 use crate::structs;
 use crate::table;
 
@@ -10,8 +11,9 @@ use text_placeholder::Template;
 
 pub fn json(path: &String, args: &Vec<String>, hydrate: &bool) {
     let values = helpers::maidfile::merge(path);
+    let project_root = parse::file::find_maidfile_root(path);
     let json = values.clone().to_json();
-    let table = table::create(values.clone(), args);
+    let table = table::create(values.clone(), args, project_root);
     let hydrated_json = Template::new_with_placeholder(&json, "%{", "}").fill_with_hashmap(&table);
 
     println!("{}", ternary!(hydrate.clone(), hydrated_json, json))

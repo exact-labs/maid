@@ -112,7 +112,7 @@ pub fn remote(task: Task) {
         },
         "maidfile": Template::new_with_placeholder(
             &task.maidfile.clone().to_json(), "%{", "}"
-        ).fill_with_hashmap(&table::create(task.maidfile.clone(), args)),
+        ).fill_with_hashmap(&table::create(task.maidfile.clone(), args, task.project)),
     });
 
     // send build files over ws using a tarfile

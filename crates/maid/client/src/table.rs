@@ -4,11 +4,12 @@ use crate::structs::Maidfile;
 use colored::Colorize;
 use macros_rs::{errorln, str, ternary};
 use serde_json::json;
+use std::path::PathBuf;
 use std::{collections::BTreeMap, collections::HashMap, env};
 use text_placeholder::Template;
 use toml::Value;
 
-pub fn create(values: Maidfile, args: &Vec<String>) -> HashMap<&str, &str> {
+pub fn create(values: Maidfile, args: &Vec<String>, project: PathBuf) -> HashMap<&str, &str> {
     let mut table = HashMap::new();
     let empty_env: BTreeMap<String, Value> = BTreeMap::new();
 
@@ -38,6 +39,10 @@ pub fn create(values: Maidfile, args: &Vec<String>) -> HashMap<&str, &str> {
             errorln!("Home directory could not be added as script variable.");
         }
     }
+
+    let project_root = helpers::string::path_to_str(&project);
+    table.insert("dir.project", project_root);
+    log::info!("{} dir.project: '{}'", helpers::string::add_icon(), project_root.yellow());
 
     for (pos, arg) in args.iter().enumerate() {
         log::info!("{} arg.{pos}: '{}'", helpers::string::add_icon(), arg.yellow());

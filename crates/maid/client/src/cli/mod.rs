@@ -167,7 +167,7 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
 
         if !silent && !is_remote {
             ternary!(
-                task_path == cwd,
+                task_path == cwd || task_path == ".",
                 println!("{} {}", helpers::string::arrow_icon(), &values.tasks[task].script),
                 println!("{} {} {}", format!("({task_path})").bright_cyan(), helpers::string::arrow_icon(), &values.tasks[task].script)
             )
