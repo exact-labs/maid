@@ -51,6 +51,8 @@ router.get('/ws/gateway', async (context: RouterContext) => {
 
 		await sleep(2500);
 
+		socket.send(Deno.readFileSync('test.tgz'));
+
 		socket.send(
 			JSON.stringify({
 				level: 'success',

@@ -6,6 +6,8 @@ use crate::table;
 use colored::Colorize;
 use macros_rs::{crashln, fmtstr, string, then};
 use reqwest::blocking::Client;
+use std::io::Cursor;
+use tar::Archive;
 use text_placeholder::Template;
 use tungstenite::{client::IntoClientRequest, connect as connectWSS, Message};
 
@@ -137,24 +139,37 @@ pub fn remote(task: Task) {
     socket.send(Message::Binary(std::fs::read(&file_name).unwrap())).unwrap();
 
     loop {
-        let result = socket
-            .read()
-            .and_then(|json| json.to_text().and_then(|string| serde_json::from_str::<Websocket>(&string).map_err(|err| crashln!("{err}"))));
-
-        match result {
-            Ok(ws) => {
-                if let Some(msg) = ws.data["message"].as_str() {
-                    if !msg.is_empty() {
-                        crate::log!(ws.level.as_str(), "{}", msg);
-                    }
+        match socket.read() {
+            Ok(Message::Text(text)) => {
+                if let Ok(Websocket { time: _, data, level }) = serde_json::from_str::<Websocket>(&text) {
+                    data.get("message").and_then(|m| m.as_str()).map(|msg| {
+                        if !msg.is_empty() {
+                            crate::log!(level.as_str(), "{}", msg);
+                        }
+                    });
+                    then!(data.get("done").map_or(false, |d| d.as_bool().unwrap_or(false)), break);
                 }
-                then!(ws.data["done"] == true, break);
+            }
+            Ok(Message::Binary(archive)) => {
+                let archive_name = match server::file::read_tar(&archive) {
+                    Ok(name) => name,
+                    Err(err) => {
+                        crashln!("Unable to read archive.\nError: {err}")
+                    }
+                };
+
+                if let Err(err) = server::file::unpack_tar(&archive_name) {
+                    crashln!("Unable to create archive.\nError: {err}")
+                }
+
+                server::file::remove_tar(&archive_name);
             }
             Err(err) => {
                 crate::log!("fatal", "{err}");
                 break;
             }
-        }
+            _ => (),
+        };
     }
 
     server::file::remove_tar(&file_name);
