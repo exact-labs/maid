@@ -5,9 +5,12 @@ version.workspace = true
 description.workspace = true
 
 [dependencies]
+tar.workspace = true
 url.workspace = true
 log.workspace = true
+uuid.workspace = true
 clap.workspace = true
+flate2.workspace = true
 reqwest.workspace = true
 colored.workspace = true
 env_logger.workspace = true

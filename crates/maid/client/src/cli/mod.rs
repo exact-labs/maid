@@ -54,6 +54,10 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
             crashln!("Maid could not find the task '{task}'. Does it exist?");
         }
 
+        if is_remote && values.tasks.get(task).unwrap().remote.is_none() {
+            crashln!("Maid could not find the remote task '{task}'. Does it exist?");
+        }
+
         match &values.tasks[task].depends {
             Some(deps) => {
                 let start = Instant::now();

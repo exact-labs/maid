@@ -60,6 +60,11 @@ pub fn init() {
 }
 
 pub fn clean() {
+    match std::fs::remove_dir_all(".maid/temp") {
+        Ok(_) => println!("{}", "removed temp archives".green()),
+        Err(_) => {}
+    };
+
     match std::fs::remove_dir_all(".maid/cache") {
         Ok(_) => println!("{}", "cleaned maid cache".green()),
         Err(_) => println!("{}", "maid cache does not exist, cannot remove".yellow()),

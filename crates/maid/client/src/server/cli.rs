@@ -121,33 +121,20 @@ pub fn remote(task: Task) {
     // hydrate any commands like 'maid clean -q' in the script do on line:112
     // put pull files in tar, pull the tar and unzip locally, then save in cache
 
+    let file_name = match server::file::write_tar(&task.remote.unwrap().push) {
+        Ok(name) => name,
+        Err(err) => {
+            crashln!("Unable to create archive.\nError: {err}")
+        }
+    };
+
+    log::debug!("sending information");
+    socket.send(Message::Text(string!("{\"sending\": \"information\"}"))).unwrap();
     socket.send(Message::Text(serde_json::to_string(&connection_data).unwrap())).unwrap();
 
-    //fix this mess
-
-    /*v2? */
-    //     loop {
-    //         let result = socket
-    //             .read()
-    //             .and_then(|json| json.to_text().and_then(|string| serde_json::from_str::<Websocket>(&string).map_err(|_| string.into())));
-    //
-    //         match result {
-    //             Ok(ws) => {
-    //                 if let Some(msg) = ws.data["message"].as_str() {
-    //                     if !msg.is_empty() {
-    //                         crate::log!(ws.level.as_str(), "{}", msg);
-    //                     }
-    //                 }
-    //
-    //                 if ws.data["done"].as_bool() == Some(true) {
-    //                     break;
-    //                 }
-    //             }
-    //             Err(err) => {
-    //                 crate::log!("fatal", "{}", err);
-    //             }
-    //         }
-    //     }
+    log::debug!("sending archive");
+    socket.send(Message::Text(string!("{\"sending\": \"archive\"}"))).unwrap();
+    socket.send(Message::Binary(std::fs::read(&file_name).unwrap())).unwrap();
 
     loop {
         let result = socket
@@ -170,6 +157,8 @@ pub fn remote(task: Task) {
         }
     }
 
+    server::file::remove_tar(&file_name);
     // run.rs:96 implement that later
     println!("\n{} {}", helpers::string::check_icon(), "finished task successfully".bright_green());
+    println!("{}", "removed temporary archive".bright_magenta());
 }

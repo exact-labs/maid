@@ -60,12 +60,7 @@ router.get('/ws/gateway', async (context: RouterContext) => {
 		);
 	});
 
-	socket.addEventListener('message', (event) => {
-		const data = JSON.parse(event.data);
-
-		console.log(data.info);
-		console.log(data.maidfile);
-	});
+	socket.addEventListener('message', (event) => console.log(event.data));
 });
 
 router.get('/api/health', async (context: RouterContext) => {
