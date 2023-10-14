@@ -15,4 +15,4 @@ exit = { script = "maid 'exit %{arg.1}'" }
 "exit good" = { script = ["exit_test 2", "exit_test 1", "exit_test 0"], hide = true }
 
 # mock routes
-mock_api_server = { script = "deno run -A server.ts", path = "tests" }
+mock_api_server = { script = "./maid_server", path = "bin" }

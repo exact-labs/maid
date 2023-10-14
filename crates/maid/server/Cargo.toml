@@ -8,3 +8,13 @@ clap.workspace = true
 clap-verbosity-flag.workspace = true
 env_logger.workspace = true
 log.workspace = true
+flate2.workspace = true
+
+# make workspace
+warp = "0.3.6"
+chrono = "0.4.31"
+macros-rs = "0.4.0"
+tungstenite = "0.20.1"
+serde_json = "1.0.107"
+futures-util = "0.3.28"
+tokio = { version = "1.33.0", features = ["full"] }

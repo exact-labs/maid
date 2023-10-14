@@ -20,8 +20,9 @@ VERSION='0.7.0'
 
 [tasks.build]
 info = "Build binaries"
+depends = ["clean"]
 script = [
-   "maid clean -q",
+   # "maid clean -q",
    "cargo build --release", 
    "mv target/release/exact-maid bin/maid",
    "mv target/release/maid_server bin/maid_server",

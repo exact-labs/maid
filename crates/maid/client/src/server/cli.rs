@@ -4,11 +4,10 @@ use crate::structs::{Maidfile, Task, Websocket};
 use crate::table;
 
 use colored::Colorize;
-use macros_rs::{crashln, fmtstr, string, then};
+use macros_rs::{crashln, fmtstr, then};
 use reqwest::blocking::Client;
-use std::io::Cursor;
-use tar::Archive;
 use text_placeholder::Template;
+use tungstenite::protocol::frame::{coding::CloseCode::Normal, CloseFrame};
 use tungstenite::{client::IntoClientRequest, connect as connectWSS, Message};
 
 pub fn health(client: Client, values: Maidfile) -> server::api::health::Route {
@@ -131,11 +130,9 @@ pub fn remote(task: Task) {
     };
 
     log::debug!("sending information");
-    socket.send(Message::Text(string!("{\"sending\": \"information\"}"))).unwrap();
     socket.send(Message::Text(serde_json::to_string(&connection_data).unwrap())).unwrap();
 
     log::debug!("sending archive");
-    socket.send(Message::Text(string!("{\"sending\": \"archive\"}"))).unwrap();
     socket.send(Message::Binary(std::fs::read(&file_name).unwrap())).unwrap();
 
     loop {
@@ -176,4 +173,12 @@ pub fn remote(task: Task) {
     // run.rs:96 implement that later
     println!("\n{} {}", helpers::string::check_icon(), "finished task successfully".bright_green());
     println!("{}", "removed temporary archive".bright_magenta());
+
+    if let Err(err) = socket.close(Some(CloseFrame {
+        code: Normal,
+        // run.rs:96 implement that later
+        reason: std::borrow::Cow::Borrowed("finished task successfully"),
+    })) {
+        crashln!("Unable to close socket.\nError: {err}")
+    };
 }

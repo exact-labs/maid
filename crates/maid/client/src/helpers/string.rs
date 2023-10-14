@@ -1,7 +1,6 @@
 use colored::{ColoredString, Colorize};
 use std::path::Path;
 
-pub fn warn_icon() -> ColoredString { "⚠".yellow() }
 pub fn seperator() -> ColoredString { ":".white() }
 pub fn arrow_icon() -> ColoredString { "»".white() }
 pub fn add_icon() -> ColoredString { "+".green() }

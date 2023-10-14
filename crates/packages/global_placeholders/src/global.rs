@@ -135,9 +135,9 @@ pub struct Immutable<T> {
 impl<T> Drop for Immutable<T> {
     fn drop(&mut self) {
         if let parking_lot::OnceState::Done = self.once.state() {
-            drop(unsafe {
+            unsafe {
                 std::ptr::drop_in_place((*self.inner.get()).as_mut_ptr());
-            });
+            }
         }
     }
 }

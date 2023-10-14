@@ -12,12 +12,12 @@ use serde_json::json;
 use std::env;
 use std::io::Error;
 use std::path::Path;
-use std::process::{Command, ExitStatus, Stdio};
+use std::process::{Child, Command, ExitStatus, Stdio};
 use std::time::Instant;
 use text_placeholder::Template;
 
 fn run_script(runner: Runner) {
-    let mut cmd;
+    let mut cmd: Child;
     let start = Instant::now();
     let mut status_array: Vec<Result<ExitStatus, Error>> = vec![];
 

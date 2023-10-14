@@ -44,7 +44,7 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
     log::info!("Starting maid {}", env!("CARGO_PKG_VERSION"));
 
     if task.is_empty() {
-        tasks::List::all(path, silent, log_level)
+        tasks::List::all(path, silent, log_level);
     } else {
         let values = helpers::maidfile::merge(path);
         let project_root = parse::file::find_maidfile_root(path);
@@ -58,30 +58,33 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
             crashln!("Maid could not find the remote task '{task}'. Does it exist?");
         }
 
-        match &values.tasks[task].depends {
-            Some(deps) => {
-                let start = Instant::now();
-                let ticks = vec!["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
-                let template = fmtstr!("{{prefix:.white}} {{spinner:.yellow}}{{msg}} {}", "({elapsed})".bright_cyan());
-                let pb = task::progress::init(ticks, template, 80);
+        if !is_remote {
+            match &values.tasks[task].depends {
+                Some(deps) => {
+                    let start = Instant::now();
+                    let ticks = vec!["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+                    let template = fmtstr!("{{prefix:.white}} {{spinner:.yellow}}{{msg}} {}", "({elapsed})".bright_cyan());
+                    let pb = task::progress::init(ticks, template, 80);
 
-                for (index, item) in deps.iter().enumerate() {
-                    pb.set_prefix(format!("[{}/{}]", index + 1, deps.len()));
-                    pb.set_message(fmtstr!("{} {item}", "running dependency".bright_yellow()));
-                    exec(&item, args, path, true, true, is_remote, log_level);
+                    for (index, item) in deps.iter().enumerate() {
+                        pb.set_prefix(format!("[{}/{}]", index + 1, deps.len()));
+                        pb.set_message(fmtstr!("{} {item}", "running dependency".bright_yellow()));
+                        exec(&item, args, path, true, true, is_remote, log_level);
+                    }
+
+                    pb.suspend(move || {
+                        println!(
+                            "{} {} in {} {}\n",
+                            helpers::string::check_icon(),
+                            format!("finished {} {}", deps.len(), ternary!(deps.len() > 1, "dependencies", "dependency")).bright_green(),
+                            format!("{:.2?}", start.elapsed()).yellow(),
+                            format!("[{}]", deps.join(", ")).white()
+                        )
+                    });
                 }
-
-                pb.suspend(|| {
-                    println!(
-                        "{} {} in {}\n",
-                        helpers::string::check_icon(),
-                        format!("finished {} dependencies", deps.len()).bright_green(),
-                        format!("{:.2?}", start.elapsed()).yellow()
-                    )
-                });
-            }
-            None => {}
-        };
+                None => {}
+            };
+        }
 
         let cache = match &values.tasks[task].cache {
             Some(cache) => cache.clone(),
