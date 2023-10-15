@@ -94,9 +94,10 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
         };
 
         let task_path = match &values.tasks[task].path {
-            Some(path) => ternary!(path == "", cwd, path),
-            None => cwd,
-        };
+            Some(path) => ternary!(path == "", helpers::string::path_to_str(project_root.as_path()), ternary!(path == "%{dir.current}", cwd, path)),
+            None => helpers::string::path_to_str(project_root.as_path()),
+        }
+        .to_string();
 
         if !cache.path.trim().is_empty() && !cache.target.is_empty() && !is_remote {
             if !helpers::Exists::folder(global!("maid.cache_dir", task)).unwrap() {
@@ -176,7 +177,7 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
 
         if !silent && !is_remote {
             ternary!(
-                task_path == cwd || task_path == ".",
+                task_path == helpers::string::path_to_str(project_root.as_path()) || task_path == "%{dir.current}" || task_path == "." || task_path == *cwd,
                 println!("{} {}", helpers::string::arrow_icon(), &values.tasks[task].script),
                 println!("{} {} {}", format!("({task_path})").bright_cyan(), helpers::string::arrow_icon(), &values.tasks[task].script)
             )
