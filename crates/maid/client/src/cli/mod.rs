@@ -72,15 +72,17 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
                         exec(&item, args, path, true, true, is_remote, log_level);
                     }
 
-                    pb.suspend(move || {
-                        println!(
-                            "{} {} in {} {}\n",
-                            helpers::string::check_icon(),
-                            format!("finished {} {}", deps.len(), ternary!(deps.len() > 1, "dependencies", "dependency")).bright_green(),
-                            format!("{:.2?}", start.elapsed()).yellow(),
-                            format!("[{}]", deps.join(", ")).white()
-                        )
-                    });
+                    if !is_dep {
+                        pb.suspend(|| {
+                            println!(
+                                "{} {} in {} {}\n",
+                                helpers::string::check_icon(),
+                                format!("finished {} {}", deps.len(), ternary!(deps.len() > 1, "dependencies", "dependency")).bright_green(),
+                                format!("{:.2?}", start.elapsed()).yellow(),
+                                format!("[{}]", deps.join(", ")).white()
+                            )
+                        });
+                    }
                 }
                 None => {}
             };
