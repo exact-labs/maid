@@ -2,6 +2,8 @@
 name = "global_placeholders"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "Simple magic placeholders"
 
 [dependencies]
 parking_lot = "0.12.1"
