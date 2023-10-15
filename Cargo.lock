@@ -514,46 +514,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "exact-maid"
-version = "0.7.5"
-dependencies = [
- "anyhow",
- "clap",
- "clap-verbosity-flag",
- "colored",
- "data-encoding",
- "env_logger",
- "flate2",
- "fs_extra",
- "global_placeholders",
- "home",
- "human_bytes",
- "indicatif",
- "inquire",
- "json5",
- "log",
- "macros-rs",
- "merge-struct",
- "merkle_hash",
- "notify",
- "notify-debouncer-mini",
- "pretty_number",
- "reqwest",
- "serde",
- "serde_derive",
- "serde_json",
- "serde_yaml",
- "strip-ansi-escapes",
- "tar",
- "termcolor",
- "text_placeholder",
- "toml",
- "tungstenite",
- "url",
- "uuid",
-]
-
-[[package]]
 name = "exit_test"
 version = "0.1.0"
 
@@ -1109,8 +1069,48 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "973fff3a34801ae9c15ba9ef09e82b1e37e2fdcb554d3e5f05d38ab2896dd383"
 
 [[package]]
+name = "maid"
+version = "0.8.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "clap-verbosity-flag",
+ "colored",
+ "data-encoding",
+ "env_logger",
+ "flate2",
+ "fs_extra",
+ "global_placeholders",
+ "home",
+ "human_bytes",
+ "indicatif",
+ "inquire",
+ "json5",
+ "log",
+ "macros-rs",
+ "merge-struct",
+ "merkle_hash",
+ "notify",
+ "notify-debouncer-mini",
+ "pretty_number",
+ "reqwest",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "serde_yaml",
+ "strip-ansi-escapes",
+ "tar",
+ "termcolor",
+ "text_placeholder",
+ "toml",
+ "tungstenite",
+ "url",
+ "uuid",
+]
+
+[[package]]
 name = "maid_server"
-version = "0.7.5"
+version = "0.8.0"
 dependencies = [
  "chrono",
  "clap",
