@@ -3,7 +3,7 @@ import = ["scripts/build.toml", "scripts/test.toml"]
 
 [project]
 name = "maid"
-version = "0.7.5"
+version = "0.8.0"
 
 # build on a remote server
 [project.server]

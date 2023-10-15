@@ -4,3 +4,6 @@ TODO.md
 bin
 .idea
 testing
+
+# prevent duplicate README
+crates/maid/client/README.md
