@@ -1,5 +1,5 @@
 [package]
-name = "exact-maid"
+name = "maid"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

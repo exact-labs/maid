@@ -24,7 +24,7 @@ depends = ["clean"]
 script = [
    # "maid clean -q",
    "cargo build --release", 
-   "mv target/release/exact-maid bin/maid",
+   "mv target/release/maid bin/maid",
    "mv target/release/maid_server bin/maid_server",
    "mv target/release/exit_test bin/exit_test"
 ]

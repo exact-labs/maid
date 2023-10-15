@@ -10,7 +10,7 @@ use text_placeholder::Template;
 use tungstenite::protocol::frame::{coding::CloseCode::Normal, CloseFrame};
 use tungstenite::{client::IntoClientRequest, connect as connectWSS, Message};
 
-pub fn health(client: Client, values: Maidfile) -> server::api::health::Route {
+fn health(client: Client, values: Maidfile) -> server::api::health::Route {
     let address = server::parse::address(&values);
     let token = server::parse::token(&values);
 
