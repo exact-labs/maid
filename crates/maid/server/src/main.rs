@@ -1,16 +1,19 @@
+mod helpers;
+mod docker;
+
 use futures_util::{SinkExt, StreamExt};
-use macros_rs::fmtstr;
+use macros_rs::{fmtstr, ternary};
 use std::convert::Infallible;
-use std::time::Duration;
 use warp::ws::Message;
 use warp::{Filter, Reply};
+use bollard::Docker;
+use std::env;
 
 #[tokio::main]
 async fn main() {
     let port = 3500;
     let token = "test_token".to_string();
 
-    let log = warp::log("maid");
     let auth = warp::header::exact("Authorization", fmtstr!("Bearer {}", token));
     let health = warp::path!("api" / "health").and_then(health_handler);
 
@@ -28,24 +31,8 @@ async fn main() {
             ))
             .await
             .unwrap();
-
-            tokio::time::sleep(Duration::from_millis(1000)).await;
-
-            tx.send(Message::text(
-                serde_json::to_string(&serde_json::json!({
-                    "level": "warning",
-                    "time": chrono::Utc::now().timestamp_millis(),
-                    "data": { "message": "some warning idk" },
-                }))
-                .unwrap(),
-            ))
-            .await
-            .unwrap();
-
-            tokio::time::sleep(Duration::from_millis(2500)).await;
-
+            
             tx.send(Message::binary(tokio::fs::read("../testing/test.tgz").await.unwrap())).await.unwrap();
-
             tx.send(Message::text(
                 serde_json::to_string(&serde_json::json!({
                     "level": "success",
@@ -64,40 +51,44 @@ async fn main() {
         })
     });
 
-    let routes = health.or(gateway).with(log).and(auth);
+    let routes = health.or(gateway).and(auth);
     warp::serve(routes).run(([0, 0, 0, 0], port)).await;
 }
 
 async fn health_handler() -> Result<impl Reply, Infallible> {
+    let socket = Docker::connect_with_socket_defaults().unwrap();
+    let info = socket.version().await.unwrap();
+    
+    let uptime = helpers::format::duration(helpers::os::uptime());
+    let version = format!("Docker v{} (build {})", &info.version.clone().unwrap(), &info.git_commit.clone().unwrap());
+    
+    println!("{:#?}", info.clone());
+    
     Ok(warp::reply::json(&serde_json::json!({
-        "uptime": {
-            "data": 168.44,
+        "version": {
+            "data": format!("v{}", env!("CARGO_PKG_VERSION")),
             "hue": "red"
         },
-        "version": {
-            "data": "0.2.1",
+        "platform": {
+            "data": format!("{} ({} {})", helpers::os::release(), env::consts::OS, env::consts::ARCH),
             "hue": "bright red"
         },
         "engine": {
-            "data": "docker",
+            "data": version,
             "hue": "yellow"
         },
         "status": {
-            "ping": {
-                "data": 36,
+            "uptime": {
+                "data": uptime,
                 "hue": "green"
             },
             "healthy": {
-                "data": "yes",
+                "data": ternary!(helpers::os::health(), "yes", "no"),
                 "hue": "cyan"
             },
-            "message": {
-                "data": "all services running",
-                "hue": "bright blue"
-            },
             "containers": {
-                "data": ["build", "build/ui"],
-                "hue": "magenta"
+                "data": docker::container::list(socket).await.unwrap(),
+                "hue": "bright blue"
             }
         }
     })))
