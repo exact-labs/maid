@@ -48,6 +48,7 @@ pull = [
 
 # basic task definition 
 [tasks]
+api_server = { depends = ["build"], script = "./maid_server", path = "bin" }
 clean = { info = "Clean binary files", script = ["rm -rf bin", "mkdir bin"] }
 install = { info = "Move binary file", script = ["sudo cp bin/maid /usr/local/bin", "echo Copied binary!"], depends = ["build"] }
 buildall = { info = "build all", script = ["rm -rf build", "mkdir build", "maid _build_macos", "maid _build_linux", "maid _build_windows"] }

@@ -13,6 +13,3 @@ broken = { info = "bad task", script = ["this_does_not_exist"] }
 exit = { script = "maid 'exit %{arg.1}'" }
 "exit bad" = { script = ["exit_test 0", "exit_test 1", "exit_test 2"], hide = true }
 "exit good" = { script = ["exit_test 2", "exit_test 1", "exit_test 0"], hide = true }
-
-# mock routes
-mock_api_server = { script = "./maid_server", path = "bin" }
