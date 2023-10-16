@@ -8,7 +8,7 @@ pub struct Value<T> {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Route {
-    pub uptime: Value<String>,
+    pub platform: Value<String>,
     pub version: Value<String>,
     pub engine: Value<String>,
     pub status: Status,
@@ -16,7 +16,7 @@ pub struct Route {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Status {
+    pub uptime: Value<String>,
     pub healthy: Value<String>,
-    pub ping: Value<f32>,
     pub containers: Value<Vec<String>>,
 }
