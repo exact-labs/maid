@@ -47,11 +47,10 @@ pub fn connect(path: &String) {
     );
 
     println!(
-        "{}\n{}\n{}\n{}\n{}",
+        "{}\n{}\n{}\n{}",
         "Server Status".green().bold(),
         format!(" {}: {}", "- Ping".white(), format!("{}ms", body.status.ping.data).color(body.status.ping.hue)),
         format!(" {}: {}", "- Healthy".white(), body.status.healthy.data.color(body.status.healthy.hue)),
-        format!(" {}: {}", "- Message".white(), body.status.message.data.color(body.status.message.hue)),
         format!(" {}: {}", "- Containers".white(), format!("{:?}", body.status.containers.data).color(body.status.containers.hue)),
     );
 }
@@ -92,10 +91,8 @@ pub fn remote(task: Task) {
 
     if body.status.healthy.data == "yes" {
         crate::log!("info", "connected successfully");
-        crate::log!("notice", "{}", body.status.message.data);
     } else {
         crate::log!("warning", "failed to connect");
-        crate::log!("notice", "{}", body.status.message.data);
     }
 
     let mut request = websocket.into_client_request().expect("Can't connect");
@@ -115,12 +112,6 @@ pub fn remote(task: Task) {
             &task.maidfile.clone().to_json(), "%{", "}"
         ).fill_with_hashmap(&table::create(task.maidfile.clone(), args, task.project)),
     });
-
-    // send build files over ws using a tarfile
-    // get sent container creation command with script below line:121
-    // untar files into container
-    // hydrate any commands like 'maid clean -q' in the script do on line:112
-    // put pull files in tar, pull the tar and unzip locally, then save in cache
 
     let file_name = match server::file::write_tar(&task.remote.unwrap().push) {
         Ok(name) => name,

@@ -18,6 +18,5 @@ pub struct Route {
 pub struct Status {
     pub healthy: Value<String>,
     pub ping: Value<f32>,
-    pub message: Value<String>,
     pub containers: Value<Vec<String>>,
 }
