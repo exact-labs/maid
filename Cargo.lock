@@ -1142,7 +1142,7 @@ checksum = "973fff3a34801ae9c15ba9ef09e82b1e37e2fdcb554d3e5f05d38ab2896dd383"
 
 [[package]]
 name = "maid"
-version = "0.8.1"
+version = "1.0.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -1182,7 +1182,7 @@ dependencies = [
 
 [[package]]
 name = "maid_server"
-version = "0.8.1"
+version = "1.0.0"
 dependencies = [
  "bollard",
  "chrono",
