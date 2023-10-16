@@ -41,15 +41,15 @@ pub fn connect(path: &String) {
     println!(
         "{}\n{}\n{}\n{}",
         "Server Info".green().bold(),
-        format!(" {}: {}", "- Version".white(), format!("v{}", body.version.data).color(body.version.hue)),
-        format!(" {}: {}", "- Platform".white(), format!("{}ms", body.platform.data).color(body.platform.hue)),
+        format!(" {}: {}", "- Version".white(), body.version.data.color(body.version.hue)),
+        format!(" {}: {}", "- Platform".white(), body.platform.data.color(body.platform.hue)),
         format!(" {}: {}", "- Engine".white(), body.engine.data.color(body.engine.hue)),
     );
 
     println!(
         "{}\n{}\n{}\n{}",
         "Server Status".green().bold(),
-        format!(" {}: {}", "- Uptime".white(), format!("{}", body.status.uptime.data).color(body.status.uptime.hue)),
+        format!(" {}: {}", "- Uptime".white(), body.status.uptime.data.color(body.status.uptime.hue)),
         format!(" {}: {}", "- Healthy".white(), body.status.healthy.data.color(body.status.healthy.hue)),
         format!(" {}: {}", "- Containers".white(), format!("{:?}", body.status.containers.data).color(body.status.containers.hue)),
     );
