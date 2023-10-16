@@ -8,7 +8,7 @@ pub struct Value<T> {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Route {
-    pub uptime: Value<f32>,
+    pub uptime: Value<String>,
     pub version: Value<String>,
     pub engine: Value<String>,
     pub status: Status,

@@ -7,7 +7,7 @@ version = "0.8.1"
 
 # build on a remote server
 [project.server]
-address = { host = "localhost", port = 3500, ssl = false }
+address = { host = "100.79.107.11", port = 3500, ssl = false }
 token = "test_token"
 
 # global enviroment
@@ -16,7 +16,7 @@ BOOL = false
 STRING = 'test'
 TYPE = '%{dir.home} %{env.STRING} %{arg.1}'
 ARR = ['hello', 'world']
-VERSION='0.7.0'
+VERSION='0.8.1'
 
 [tasks.build]
 info = "Build binaries"

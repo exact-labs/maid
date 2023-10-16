@@ -41,7 +41,7 @@ pub fn connect(path: &String) {
     println!(
         "{}\n{}\n{}\n{}",
         "Server Info".green().bold(),
-        format!(" {}: {}", "- Uptime".white(), format!("{}d", body.uptime.data).color(body.uptime.hue)),
+        format!(" {}: {}", "- Uptime".white(), format!("{}", body.uptime.data).color(body.uptime.hue)),
         format!(" {}: {}", "- Version".white(), format!("v{}", body.version.data).color(body.version.hue)),
         format!(" {}: {}", "- Engine".white(), body.engine.data.color(body.engine.hue)),
     );
