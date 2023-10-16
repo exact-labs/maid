@@ -30,8 +30,6 @@ fn working_dir() -> PathBuf {
 
 #[allow(unused_variables)]
 fn find_path(path: &Path, file_name: &str, kind: &str) -> Result<Option<fs::DirEntry>> {
-    let result;
-
     #[cfg(target_os = "linux")]
     {
         for entry in fs::read_dir(path)? {
@@ -39,18 +37,16 @@ fn find_path(path: &Path, file_name: &str, kind: &str) -> Result<Option<fs::DirE
             let file_path = Box::leak(create_path!(file_name, kind).into_boxed_path()).to_string_lossy().to_string();
 
             if entry.file_name().to_string_lossy().eq_ignore_ascii_case(&file_path) {
-                result = Some(entry);
+                return Ok(Some(entry));
             }
         }
-        result = None;
+        Ok(None)
     }
 
     #[cfg(not(target_os = "linux"))]
     {
-        result = None;
+        Ok(None)
     }
-
-    Ok(result)
 }
 
 fn find_file(starting_directory: &Path, file_name: &String, trace: bool) -> Option<PathBuf> {
