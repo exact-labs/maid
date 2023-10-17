@@ -3,7 +3,7 @@ import = ["scripts/build.toml", "scripts/test.toml"]
 
 [project]
 name = "maid"
-version = "1.0.0"
+version = "1.1.0"
 
 # build on a remote server
 [project.server]
@@ -16,7 +16,7 @@ BOOL = false
 STRING = 'test'
 TYPE = '%{dir.home} %{env.STRING} %{arg.1}'
 ARR = ['hello', 'world']
-VERSION='1.0.0'
+VERSION='1.1.0'
 
 [tasks.build]
 info = "Build binaries"
