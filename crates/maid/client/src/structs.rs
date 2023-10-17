@@ -70,8 +70,11 @@ pub struct CacheConfig {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Remote {
     pub push: Vec<String>,
-    pub pull: Vec<String>,
+    pub pull: String,
     pub image: String,
+    pub shell: String,
+    pub silent: bool,
+    pub exclusive: bool,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -112,4 +115,18 @@ pub struct Websocket {
     pub level: String,
     pub time: i64,
     pub data: JsonValue,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct ConnectionInfo {
+    pub name: String,
+    pub remote: Remote,
+    pub args: Vec<String>,
+    pub script: Vec<String>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct ConnectionData {
+    pub info: ConnectionInfo,
+    pub maidfile: Maidfile,
 }

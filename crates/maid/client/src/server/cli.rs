@@ -1,14 +1,12 @@
 use crate::helpers;
 use crate::server;
-use crate::structs::{Maidfile, Task, Websocket};
-use crate::table;
+use crate::structs::{ConnectionData, ConnectionInfo, Maidfile, Task, Websocket};
 
 use colored::Colorize;
 use macros_rs::{crashln, fmtstr, then};
 use reqwest::blocking::Client;
-use text_placeholder::Template;
 use tungstenite::protocol::frame::{coding::CloseCode::Normal, CloseFrame};
-use tungstenite::{client::IntoClientRequest, connect as connectWSS, Message};
+use tungstenite::{client::connect_with_config, client::IntoClientRequest, protocol::WebSocketConfig, Message};
 
 fn health(client: Client, values: Maidfile) -> server::api::health::Route {
     let address = server::parse::address(&values);
@@ -56,7 +54,6 @@ pub fn connect(path: &String) {
 }
 
 pub fn remote(task: Task) {
-    let args = &task.args.clone();
     let mut script: Vec<&str> = vec![];
 
     if task.script.is_str() {
@@ -90,28 +87,31 @@ pub fn remote(task: Task) {
     crate::log!("info", "connecting to {host}:{port}");
 
     if body.status.healthy.data == "yes" {
-        crate::log!("info", "connected successfully");
+        crate::log!("notice", "server reports healthy");
     } else {
         crate::log!("warning", "failed to connect");
     }
 
+    let websocket_config = WebSocketConfig {
+        max_frame_size: Some(314572800),
+        ..Default::default()
+    };
+
     let mut request = websocket.into_client_request().expect("Can't connect");
     request.headers_mut().insert("Authorization", fmtstr!("Bearer {token}").parse().unwrap());
 
-    let (mut socket, response) = connectWSS(request).expect("Can't connect");
+    let (mut socket, response) = connect_with_config(request, Some(websocket_config), 3).expect("Can't connect");
     log::debug!("response code: {}", response.status());
 
-    let connection_data = serde_json::json!({
-        "info": {
-            "name": &task.name,
-            "args": &task.args,
-            "remote": &task.remote,
-            "script": script,
+    let connection_data = ConnectionData {
+        info: ConnectionInfo {
+            name: task.name.clone(),
+            args: task.args.clone(),
+            remote: task.remote.clone().unwrap(),
+            script: script.clone().iter().map(|&s| s.to_string()).collect(),
         },
-        "maidfile": Template::new_with_placeholder(
-            &task.maidfile.clone().to_json(), "%{", "}"
-        ).fill_with_hashmap(&table::create(task.maidfile.clone(), args, task.project)),
-    });
+        maidfile: task.maidfile.clone(),
+    };
 
     let file_name = match server::file::write_tar(&task.remote.unwrap().push) {
         Ok(name) => name,
@@ -123,9 +123,6 @@ pub fn remote(task: Task) {
     log::debug!("sending information");
     socket.send(Message::Text(serde_json::to_string(&connection_data).unwrap())).unwrap();
 
-    log::debug!("sending archive");
-    socket.send(Message::Binary(std::fs::read(&file_name).unwrap())).unwrap();
-
     loop {
         match socket.read() {
             Ok(Message::Text(text)) => {
@@ -135,6 +132,12 @@ pub fn remote(task: Task) {
                             crate::log!(level.as_str(), "{}", msg);
                         }
                     });
+
+                    if data.get("binary").map_or(false, |d| d.as_bool().unwrap_or(false)) {
+                        log::debug!("sending archive");
+                        socket.send(Message::Binary(std::fs::read(&file_name).unwrap())).unwrap();
+                    }
+
                     then!(data.get("done").map_or(false, |d| d.as_bool().unwrap_or(false)), break);
                 }
             }

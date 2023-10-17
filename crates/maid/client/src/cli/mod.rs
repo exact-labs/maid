@@ -44,7 +44,11 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
     log::info!("Starting maid {}", env!("CARGO_PKG_VERSION"));
 
     if task.is_empty() {
-        tasks::List::all(path, silent, log_level);
+        if is_remote {
+            tasks::List::remote(path, silent, log_level);
+        } else {
+            tasks::List::all(path, silent, log_level);
+        }
     } else {
         let values = helpers::maidfile::merge(path);
         let project_root = parse::file::find_maidfile_root(path);
@@ -56,6 +60,10 @@ pub fn exec(task: &str, args: &Vec<String>, path: &String, silent: bool, is_dep:
 
         if is_remote && values.tasks.get(task).unwrap().remote.is_none() {
             crashln!("Maid could not find the remote task '{task}'. Does it exist?");
+        }
+
+        if is_remote && values.tasks.get(task).unwrap().remote.as_ref().unwrap().exclusive {
+            crashln!("Task '{task}' is remote only.");
         }
 
         if !is_remote {

@@ -22,8 +22,7 @@ VERSION='1.0.0'
 info = "Build binaries"
 depends = ["clean"]
 script = [
-   # "maid clean -q",
-   "cargo build --release", 
+   "cargo zigbuild --release", 
    "mv target/release/maid bin/maid",
    "mv target/release/maid_server bin/maid_server",
    "mv target/release/exit_test bin/exit_test"
@@ -38,17 +37,15 @@ target = [
 ]
 
 [tasks.build.remote]
-image = "rust"
+silent = true
+exclusive = false
+shell = "/bin/bash"
+image = "rust:1.73"
 push = ["crates", "Cargo.toml", "Cargo.lock"]
-pull = [
-   "bin/maid", 
-   "bin/exit_test", 
-   "bin/maid_server"
-]
+pull = "bin"
 
 # basic task definition 
 [tasks]
 api_server = { depends = ["build"], script = "./maid_server", path = "bin" }
 clean = { info = "Clean binary files", script = ["rm -rf bin", "mkdir bin"] }
 install = { info = "Move binary file", script = ["sudo cp bin/maid /usr/local/bin", "echo Copied binary!"], depends = ["build"] }
-buildall = { info = "build all", script = ["rm -rf build", "mkdir build", "maid _build_macos", "maid _build_linux", "maid _build_windows"] }

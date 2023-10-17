@@ -1,24 +1,44 @@
-# hidden tasks (can also hide with `hide = true`)
-[tasks._build_macos]
+# task intended to run on remote only
+[tasks.build_all]
+info = "build all"
 script = [
-"cargo build --release", 
-"mv target/release/exact-maid build/maid",
-"zip build/maid_%{env.VERSION}_darwin_amd64.zip build/maid",
-"rm build/maid",
+   # install packages
+   "apt-get update",
+   "apt-get install zip mingw-w64 -y",
+   "mkdir build",
+   
+   # build linux (x86_64)
+   "cargo zigbuild -r -p maid",
+   "mv target/release/maid build/maid",
+   "zip build/maid_%{env.VERSION}_linux_amd64.zip build/maid",
+   "rm build/maid",
+   
+   # build windows (x86_64)
+   "cargo zigbuild -r -p maid --target x86_64-pc-windows-gnu",
+   "mv target/x86_64-pc-windows-gnu/release/maid.exe build/maid.exe",
+   "zip build/maid_%{env.VERSION}_windows_amd64.zip build/maid.exe",
+   "rm build/maid.exe",
+   
+   # build macos (x86_64)
+   "cargo zigbuild -r -p maid --target x86_64-apple-darwin", 
+   "mv target/x86_64-apple-darwin/release/maid build/maid",
+   "zip build/maid_%{env.VERSION}_darwin_amd64.zip build/maid",
+   "rm build/maid",
+   
+   # build macos (aarch64)
+   "cargo zigbuild -r -p maid --target aarch64-apple-darwin", 
+   "mv target/aarch64-apple-darwin/release/maid build/maid",
+   "zip build/maid_%{env.VERSION}_darwin_arm.zip build/maid",
+   "rm build/maid",
+   
+   # post build
+   "ls -sh build",
 ]
 
-[tasks._build_linux]
-script = [
-"cargo build --release --target x86_64-unknown-linux-musl", 
-"mv target/release/exact-maid build/maid",
-"zip build/maid_%{env.VERSION}_linux_amd64.zip build/maid",
-"rm build/maid",
-]
-
-[tasks._build_windows]
-script = [
-"cargo build --release --target x86_64-pc-windows-gnu", 
-"mv target/release/exact-maid build/maid",
-"zip build/maid_%{env.VERSION}_windows_amd64.zip build/maid",
-"rm build/maid",
-]
+[tasks.build_all.remote]
+silent = false
+exclusive = true
+shell = "/bin/bash"
+image = "messense/cargo-zigbuild:latest"
+push = ["crates", "Cargo.toml", "Cargo.lock"]
+pull = "build"

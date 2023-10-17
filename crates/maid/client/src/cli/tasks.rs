@@ -41,7 +41,10 @@ impl List {
                     true => true,
                     false => match task.hide {
                         Some(val) => val,
-                        None => false,
+                        None => match task.remote.as_ref() {
+                            Some(val) => val.exclusive,
+                            None => false,
+                        },
                     },
                 };
 

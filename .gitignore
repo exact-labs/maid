@@ -3,6 +3,7 @@ target
 TODO.md
 bin
 .idea
+build
 testing
 
 # prevent duplicate README

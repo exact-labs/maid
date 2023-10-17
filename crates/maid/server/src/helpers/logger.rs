@@ -7,8 +7,6 @@ macro_rules! log {
             ("warning", ("WARN", "yellow")),
             ("success", ("SUCCESS", "green")),
             ("notice", ("NOTICE", "bright blue")),
-            ("docker", ("DOCKER", "bright yellow")),
-            ("build", ("BUILD", "bright green")),
             ("info", ("INFO", "cyan")),
             ("debug", ("DEBUG", "magenta")),
         ]

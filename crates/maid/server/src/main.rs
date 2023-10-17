@@ -1,5 +1,8 @@
 mod helpers;
 mod docker;
+mod globals;
+mod structs;
+mod table;
 
 use futures_util::{SinkExt, StreamExt};
 use macros_rs::{fmtstr, ternary};
@@ -11,6 +14,8 @@ use std::env;
 
 #[tokio::main]
 async fn main() {
+    globals::init();
+    
     let port = 3500;
     let token = "test_token".to_string();
 
@@ -19,7 +24,8 @@ async fn main() {
 
     let gateway = warp::path!("ws" / "gateway").and(warp::ws()).map(|ws: warp::ws::Ws| {
         ws.on_upgrade(|websocket| async {
-            let (mut tx, mut rx) = websocket.split();
+            let (mut tx, rx) = websocket.split();
+            let socket = Docker::connect_with_socket_defaults().unwrap();
 
             tx.send(Message::text(
                 serde_json::to_string(&serde_json::json!({
@@ -32,22 +38,7 @@ async fn main() {
             .await
             .unwrap();
             
-            tx.send(Message::binary(tokio::fs::read("../testing/test.tgz").await.unwrap())).await.unwrap();
-            tx.send(Message::text(
-                serde_json::to_string(&serde_json::json!({
-                    "level": "success",
-                    "time": chrono::Utc::now().timestamp_millis(),
-                    "data": { "done": true, "message": "" },
-                }))
-                .unwrap(),
-            ))
-            .await
-            .unwrap();
-
-            while let Some(result) = rx.next().await {
-                let message = result.unwrap();
-                println!("received message: {:?}", message);
-            }
+            docker::run::exec(tx, rx, socket).await.unwrap();
         })
     });
 
@@ -61,9 +52,7 @@ async fn health_handler() -> Result<impl Reply, Infallible> {
     
     let uptime = helpers::format::duration(helpers::os::uptime());
     let version = format!("Docker v{} (build {})", &info.version.clone().unwrap(), &info.git_commit.clone().unwrap());
-    
-    println!("{:#?}", info.clone());
-    
+        
     Ok(warp::reply::json(&serde_json::json!({
         "version": {
             "data": format!("v{}", env!("CARGO_PKG_VERSION")),
