@@ -22,7 +22,7 @@ VERSION='1.1.0'
 info = "Build binaries"
 depends = ["clean"]
 script = [
-   "cargo zigbuild --release", 
+   "cargo zigbuild --release --color always", 
    "mv target/release/maid bin/maid",
    "mv target/release/maid_server bin/maid_server",
    "mv target/release/exit_test bin/exit_test"
@@ -37,10 +37,10 @@ target = [
 ]
 
 [tasks.build.remote]
-silent = true
+silent = false
 exclusive = false
 shell = "/bin/bash"
-image = "rust:1.73"
+image = "messense/cargo-zigbuild:latest"
 push = ["crates", "Cargo.toml", "Cargo.lock"]
 pull = "bin"
 

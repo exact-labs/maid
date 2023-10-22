@@ -128,7 +128,9 @@ pub fn remote(task: Task) {
             Ok(Message::Text(text)) => {
                 if let Ok(Websocket { time: _, data, level }) = serde_json::from_str::<Websocket>(&text) {
                     data.get("message").and_then(|m| m.as_str()).map(|msg| {
-                        if !msg.is_empty() {
+                        if level.as_str() == "none" {
+                            print!("{msg}");
+                        } else {
                             crate::log!(level.as_str(), "{}", msg);
                         }
                     });

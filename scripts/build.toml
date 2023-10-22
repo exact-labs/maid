@@ -8,25 +8,25 @@ script = [
    "mkdir build",
    
    # build linux (x86_64)
-   "cargo zigbuild -r -p maid",
+   "cargo zigbuild -r -p maid --color always",
    "mv target/release/maid build/maid",
    "zip build/maid_%{env.VERSION}_linux_amd64.zip build/maid",
    "rm build/maid",
    
    # build windows (x86_64)
-   "cargo zigbuild -r -p maid --target x86_64-pc-windows-gnu",
+   "cargo zigbuild -r -p maid --target x86_64-pc-windows-gnu --color always",
    "mv target/x86_64-pc-windows-gnu/release/maid.exe build/maid.exe",
    "zip build/maid_%{env.VERSION}_windows_amd64.zip build/maid.exe",
    "rm build/maid.exe",
    
    # build macos (x86_64)
-   "cargo zigbuild -r -p maid --target x86_64-apple-darwin", 
+   "cargo zigbuild -r -p maid --target x86_64-apple-darwin --color always", 
    "mv target/x86_64-apple-darwin/release/maid build/maid",
    "zip build/maid_%{env.VERSION}_darwin_amd64.zip build/maid",
    "rm build/maid",
    
    # build macos (aarch64)
-   "cargo zigbuild -r -p maid --target aarch64-apple-darwin", 
+   "cargo zigbuild -r -p maid --target aarch64-apple-darwin --color always", 
    "mv target/aarch64-apple-darwin/release/maid build/maid",
    "zip build/maid_%{env.VERSION}_darwin_arm.zip build/maid",
    "rm build/maid",
