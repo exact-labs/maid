@@ -3,8 +3,8 @@
 info = "build all"
 script = [
    # install packages
-   "apt-get update",
-   "apt-get install zip mingw-w64 -y",
+   "apt update --color always",
+   "apt install zip mingw-w64 -y --color always",
    "mkdir build",
    
    # build linux (x86_64)

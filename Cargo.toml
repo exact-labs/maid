@@ -27,7 +27,7 @@ tar = "0.4.40"
 colored = "2.0.4"
 flate2 = "1.0.28"
 env_logger = "0.10.0"
-clap-verbosity-flag = "2.0.1"
-clap = { version = "4.4.6", features = ["derive"] }
-uuid = { version = "1.4.1", features = ["v4", "fast-rng"] }
+clap-verbosity-flag = "2.1.0"
+clap = { version = "4.4.7", features = ["derive"] }
+uuid = { version = "1.5.0", features = ["v4", "fast-rng"] }
 reqwest = { version = "0.11.22", features = ["json", "blocking"] }

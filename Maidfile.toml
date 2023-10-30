@@ -1,5 +1,9 @@
 # import tasks and enviroment from other files
-import = ["scripts/build.toml", "scripts/test.toml"]
+import = [
+   "scripts/build.toml", 
+   "scripts/test.toml",
+   "scripts/publish.toml"
+]
 
 [project]
 name = "maid"
