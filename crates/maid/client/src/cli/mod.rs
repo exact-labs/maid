@@ -11,6 +11,13 @@ use human_bytes::human_bytes;
 use macros_rs::{crashln, fmtstr, string, ternary};
 use std::{env, path::Path, time::Instant};
 
+pub fn get_version(short: bool) -> String {
+    return match short {
+        true => format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")),
+        false => format!("{} ({} {})", env!("CARGO_PKG_VERSION"), env!("GIT_HASH"), env!("BUILD_DATE")),
+    };
+}
+
 pub fn info(path: &String) {
     let values = helpers::maidfile::merge(path);
     let project_root = parse::file::find_maidfile_root(path);

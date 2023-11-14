@@ -42,3 +42,6 @@ clap-verbosity-flag = "2.1.0"
 notify-debouncer-mini = "0.4.1"
 human_bytes = { version = "0.4.3", default-features = false }
 tungstenite = { version = "0.20.1", features = ["native-tls"] }
+
+[build-dependencies]
+chrono = "0.4.23"

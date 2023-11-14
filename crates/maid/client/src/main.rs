@@ -10,10 +10,11 @@ mod task;
 
 use clap::{Parser, Subcommand};
 use clap_verbosity_flag::Verbosity;
+use macros_rs::str;
 use std::path::Path;
 
 #[derive(Parser)]
-#[command(version)]
+#[command(version = str!(cli::get_version(false)))]
 struct Cli {
     /// Run a task defined in maidfile
     #[arg(default_value = "", hide_default_value = true)]
