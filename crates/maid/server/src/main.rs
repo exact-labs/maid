@@ -12,7 +12,7 @@ use rocket::{get, http::Status, launch, outcome::Outcome, routes, State};
 use rocket_ws::{Channel, Message, WebSocket};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use std::{env, io::Write};
+use std::env;
 
 struct DockerState {
     docker: Result<Docker, anyhow::Error>,
@@ -151,10 +151,10 @@ async fn rocket() -> _ {
     let http = true;
 
     std::env::set_var("ROCKET_PORT", "3500");
-    std::env::set_var("RUST_LOG", "info");
+    std::env::set_var("RUST_LOG", "rocket");
 
     globals::init();
-    env_logger::builder().format(|buf, record| writeln!(buf, "{}: {}", record.level(), record.args())).init();
+    pretty_env_logger::init();
 
     let socket = async move {
         let socket = match http {
