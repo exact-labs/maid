@@ -137,7 +137,7 @@ fn stream(ws: WebSocket, docker_state: &State<DockerState>, _token: Token) -> Ch
 
             match docker::run::exec(stream, &docker_state.docker).await {
                 Ok(_) => log::info!("build finished"),
-                Err() => log::error!("failed to build"),
+                Err(_) => log::error!("failed to build"),
             };
 
             Ok(())
