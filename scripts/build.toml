@@ -39,6 +39,6 @@ script = [
 silent = false
 exclusive = true
 shell = "/bin/bash"
-image = "messense/cargo-zigbuild:latest"
+image = "themackabu/rust:zigbuild-1.74.0"
 push = ["crates", "Cargo.toml", "Cargo.lock"]
 pull = "build"

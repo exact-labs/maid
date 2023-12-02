@@ -11,7 +11,7 @@ version = "1.1.0"
 
 # build on a remote server
 [project.server]
-address = { host = "100.79.107.11", port = 3500, ssl = false }
+address = { host = "localhost", port = 3500, ssl = false }
 token = "test_token"
 
 # global enviroment

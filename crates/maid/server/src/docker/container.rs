@@ -3,18 +3,19 @@ use bollard::Docker;
 use futures_util::stream::StreamExt;
 use std::collections::HashMap;
 
-pub async fn list(docker: Docker) -> Result<Vec<String>, Box<dyn std::error::Error>> {
+pub async fn list(docker: &Docker) -> Result<Vec<String>, Box<dyn std::error::Error>> {
     let mut filter: HashMap<String, Vec<String>> = HashMap::new();
     let mut container_list: Vec<String> = vec![];
 
     filter.insert(String::from("status"), vec![String::from("running")]);
-    let containers = &docker
-        .list_containers(Some(ListContainersOptions {
-            all: true,
-            filters: filter,
-            ..Default::default()
-        }))
-        .await?;
+    let containers =
+        &docker
+            .list_containers(Some(ListContainersOptions {
+                all: true,
+                filters: filter,
+                ..Default::default()
+            }))
+            .await?;
 
     if containers.is_empty() {
         Ok(container_list)

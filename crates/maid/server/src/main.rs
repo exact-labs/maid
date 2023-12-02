@@ -1,59 +1,31 @@
-mod helpers;
 mod docker;
 mod globals;
+mod helpers;
 mod structs;
 mod table;
 
-use futures_util::{SinkExt, StreamExt};
-use macros_rs::{fmtstr, ternary};
-use std::convert::Infallible;
-use warp::ws::Message;
-use warp::{Filter, Reply};
-use bollard::Docker;
+use bollard::{Docker, API_DEFAULT_VERSION};
+use docker::container;
+use macros_rs::ternary;
+use rocket::{get, launch, routes, State};
+use rocket_ws::{Config, Stream, WebSocket};
+use serde_json::{json, Value};
 use std::env;
 
-#[tokio::main]
-async fn main() {
-    globals::init();
-    
-    let port = 3500;
-    let token = "test_token".to_string();
-
-    let auth = warp::header::exact("Authorization", fmtstr!("Bearer {}", token));
-    let health = warp::path!("api" / "health").and_then(health_handler);
-
-    let gateway = warp::path!("ws" / "gateway").and(warp::ws()).map(|ws: warp::ws::Ws| {
-        ws.on_upgrade(|websocket| async {
-            let (mut tx, rx) = websocket.split();
-            let socket = Docker::connect_with_socket_defaults().unwrap();
-
-            tx.send(Message::text(
-                serde_json::to_string(&serde_json::json!({
-                    "level": "success",
-                    "time": chrono::Utc::now().timestamp_millis(),
-                    "data": { "connected": true, "message": "client connected" },
-                }))
-                .unwrap(),
-            ))
-            .await
-            .unwrap();
-            
-            docker::run::exec(tx, rx, socket).await.unwrap();
-        })
-    });
-
-    let routes = health.or(gateway).and(auth);
-    warp::serve(routes).run(([0, 0, 0, 0], port)).await;
+struct DockerState {
+    docker: Result<Docker, anyhow::Error>,
 }
 
-async fn health_handler() -> Result<impl Reply, Infallible> {
-    let socket = Docker::connect_with_socket_defaults().unwrap();
+#[get("/api/health")]
+async fn health(docker_state: &State<DockerState>) -> Value {
+    let socket = &docker_state.docker.as_ref().unwrap();
     let info = socket.version().await.unwrap();
-    
+    let containers = container::list(socket).await.unwrap();
+
     let uptime = helpers::format::duration(helpers::os::uptime());
     let version = format!("Docker v{} (build {})", &info.version.clone().unwrap(), &info.git_commit.clone().unwrap());
-        
-    Ok(warp::reply::json(&serde_json::json!({
+
+    json!({
         "version": {
             "data": format!("v{}", env!("CARGO_PKG_VERSION")),
             "hue": "red"
@@ -76,9 +48,75 @@ async fn health_handler() -> Result<impl Reply, Infallible> {
                 "hue": "cyan"
             },
             "containers": {
-                "data": docker::container::list(socket).await.unwrap(),
+                "data": containers,
                 "hue": "bright blue"
             }
         }
-    })))
+    })
 }
+
+#[get("/echo")]
+fn stream(ws: WebSocket) -> Stream!['static] {
+    let ws = ws.config(Config {
+        max_send_queue: Some(5),
+        ..Default::default()
+    });
+
+    Stream! { ws =>
+        for await message in ws {
+            yield message?;
+        }
+    }
+}
+
+#[launch]
+#[tokio::main]
+async fn rocket() -> _ {
+    globals::init();
+
+    let http = true;
+    let token = "test_token".to_string();
+
+    std::env::set_var("ROCKET_PORT", "3500");
+
+    let socket = async move {
+        let socket = match http {
+            true => Docker::connect_with_http("100.79.107.11:4250", 120, API_DEFAULT_VERSION)?.clone(),
+            false => Docker::connect_with_socket_defaults()?.clone(),
+        };
+
+        Ok::<Docker, anyhow::Error>(socket)
+    };
+
+    let docker_socket = tokio::spawn(socket);
+    let docker_socket = docker_socket.await.unwrap();
+
+    rocket::build().manage(DockerState { docker: docker_socket }).mount("/", routes![health, stream])
+}
+
+// #[tokio::main]
+// async fn main() ->  {
+//     // let connection = Docker::connect_with_http(
+//     //                    "http://my-custom-docker-server:2735", 4, API_DEFAULT_VERSION)
+//     //                    .unwrap();
+//
+//     // let session = SessionBuilder::default()
+//     //     .user("root".to_string())
+//     //     .port(22)
+//     //     .known_hosts_check(KnownHosts::Accept)
+//     //     .control_directory(std::env::temp_dir())
+//     //     .connect_timeout(Duration::from_secs(5))
+//     //     .connect("100.79.107.11")
+//     //     .await;
+//
+//     let auth = warp::header::exact("Authorization", fmtstr!("Bearer {}", token));
+//     let health = warp::path!("api" / "health").and_then(health_handler);
+//
+//
+//
+//
+//
+//     let routes = health.or(gateway).and(auth);
+//
+//     Ok(warp::serve(routes).run(([0, 0, 0, 0], port)).await)
+// }

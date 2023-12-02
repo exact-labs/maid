@@ -1,10 +1,15 @@
+# misc
 target
-.maid
 TODO.md
 bin
 .idea
 build
 testing
+.in
 
 # prevent duplicate README
 crates/maid/client/README.md
+
+# maid
+.maid/cache
+.maid/temp

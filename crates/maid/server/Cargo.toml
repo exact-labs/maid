@@ -19,13 +19,11 @@ global_placeholders.workspace = true
 
 # make workspace
 home = "0.5.5"
-warp = "0.3.6"
 bytes = "1.5.0"
 ntapi = "0.4.1"
 libc = "0.2.149"
 winapi = "0.3.9"
 anyhow = "1.0.75"
-serde = "1.0.190"
 chrono = "0.4.31"
 futures = "0.3.29"
 bollard = "0.15.0"
@@ -40,3 +38,6 @@ futures-util = "0.3.29"
 serde_derive = "1.0.190"
 text_placeholder = "0.5.0"
 tokio = { version = "1.33.0", features = ["full"] }
+serde = { version = "1.0.192", features = ["derive"] }
+rocket = { version = "0.5.0", features = ["json", "msgpack"] }
+rocket_ws = "0.1.0"
