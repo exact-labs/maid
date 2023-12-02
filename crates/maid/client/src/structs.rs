@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use serde_json::Value as JsonValue;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 use toml::Value as TomlValue;
@@ -110,11 +109,33 @@ pub struct DisplayTask {
     pub hidden: bool,
 }
 
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, Hash)]
+pub enum Level {
+    None,
+    Fatal,
+    Docker,
+    Debug,
+    Error,
+    Notice,
+    Info,
+    Build,
+    Warning,
+    Success,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub enum Kind {
+    Done,
+    Binary,
+    Message,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Websocket {
-    pub level: String,
+    pub level: Level,
+    pub kind: Kind,
     pub time: i64,
-    pub data: JsonValue,
+    pub message: Option<String>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]

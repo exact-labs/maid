@@ -7,12 +7,12 @@ import = [
 
 [project]
 name = "maid"
-version = "1.1.0"
+version = "1.2.0"
 
 # build on a remote server
 [project.server]
 address = { host = "localhost", port = 3500, ssl = false }
-token = "test_token"
+token = "test_token1"
 
 # global enviroment
 [env]
@@ -20,7 +20,7 @@ BOOL = false
 STRING = 'test'
 TYPE = '%{dir.home} %{env.STRING} %{arg.1}'
 ARR = ['hello', 'world']
-VERSION='1.1.0'
+VERSION='1.2.0'
 
 [tasks.build]
 info = "Build binaries"

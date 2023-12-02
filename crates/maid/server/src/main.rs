@@ -6,9 +6,11 @@ mod table;
 
 use bollard::{Docker, API_DEFAULT_VERSION};
 use docker::container;
-use macros_rs::ternary;
-use rocket::{get, launch, routes, State};
-use rocket_ws::{Config, Stream, WebSocket};
+use macros_rs::{fmtstr, ternary};
+use rocket::futures::SinkExt;
+use rocket::{get, http::Status, launch, outcome::Outcome, routes, State};
+use rocket_ws::{Channel, Message, WebSocket};
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::env;
 
@@ -16,8 +18,74 @@ struct DockerState {
     docker: Result<Docker, anyhow::Error>,
 }
 
+#[derive(Serialize, Deserialize)]
+enum Level {
+    None,
+    Fatal,
+    Docker,
+    Debug,
+    Error,
+    Notice,
+    Info,
+    Build,
+    Warning,
+    Success,
+}
+
+#[derive(Serialize, Deserialize)]
+enum Kind {
+    Done,
+    Binary,
+    Message,
+}
+
+struct Response {
+    level: Level,
+    kind: Kind,
+    message: Option<String>,
+}
+
+impl Response {
+    fn to_string(&self) -> String {
+        let json_value = serde_json::json!({
+            "kind": &self.kind,
+            "level": &self.level,
+            "message": &self.message,
+            "time": chrono::Utc::now().timestamp_millis(),
+        });
+
+        serde_json::to_string(&json_value).unwrap()
+    }
+}
+
+impl From<Response> for Message {
+    fn from(response: Response) -> Self { Message::text(response.to_string()) }
+}
+
+#[derive(Debug)]
+struct Token(String);
+
+#[rocket::async_trait]
+impl<'r> rocket::request::FromRequest<'r> for Token {
+    type Error = ();
+
+    async fn from_request(request: &'r rocket::Request<'_>) -> rocket::request::Outcome<Self, Self::Error> {
+        let token = "test_token1".to_string();
+        let authorization_header = request.headers().get_one("Authorization");
+
+        if let Some(header_value) = authorization_header {
+            if header_value == fmtstr!("Bearer {token}") {
+                let token = header_value.trim_start_matches("Bearer ").to_owned();
+                return Outcome::Success(Token(token));
+            }
+        }
+
+        Outcome::Error((Status::Unauthorized, ()))
+    }
+}
+
 #[get("/api/health")]
-async fn health(docker_state: &State<DockerState>) -> Value {
+async fn health(docker_state: &State<DockerState>, _token: Token) -> Value {
     let socket = &docker_state.docker.as_ref().unwrap();
     let info = socket.version().await.unwrap();
     let containers = container::list(socket).await.unwrap();
@@ -55,29 +123,38 @@ async fn health(docker_state: &State<DockerState>) -> Value {
     })
 }
 
-#[get("/echo")]
-fn stream(ws: WebSocket) -> Stream!['static] {
-    let ws = ws.config(Config {
-        max_send_queue: Some(5),
-        ..Default::default()
-    });
+#[get("/ws/gateway")]
+fn stream(ws: WebSocket, docker_state: &State<DockerState>, _token: Token) -> Channel {
+    let connect_success = Response {
+        level: Level::Success,
+        kind: Kind::Message,
+        message: Some("client connected".to_string()),
+    };
 
-    Stream! { ws =>
-        for await message in ws {
-            yield message?;
-        }
-    }
+    ws.channel(move |mut stream| {
+        Box::pin(async move {
+            stream.send(connect_success.into()).await?;
+
+            match docker::run::exec(stream, &docker_state.docker).await {
+                Ok(_) => log::info!("build finished"),
+                Err() => log::error!("failed to build"),
+            };
+
+            Ok(())
+        })
+    })
 }
 
 #[launch]
 #[tokio::main]
 async fn rocket() -> _ {
-    globals::init();
-
     let http = true;
-    let token = "test_token".to_string();
 
     std::env::set_var("ROCKET_PORT", "3500");
+    std::env::set_var("RUST_LOG", "info");
+
+    globals::init();
+    env_logger::init();
 
     let socket = async move {
         let socket = match http {
@@ -93,30 +170,3 @@ async fn rocket() -> _ {
 
     rocket::build().manage(DockerState { docker: docker_socket }).mount("/", routes![health, stream])
 }
-
-// #[tokio::main]
-// async fn main() ->  {
-//     // let connection = Docker::connect_with_http(
-//     //                    "http://my-custom-docker-server:2735", 4, API_DEFAULT_VERSION)
-//     //                    .unwrap();
-//
-//     // let session = SessionBuilder::default()
-//     //     .user("root".to_string())
-//     //     .port(22)
-//     //     .known_hosts_check(KnownHosts::Accept)
-//     //     .control_directory(std::env::temp_dir())
-//     //     .connect_timeout(Duration::from_secs(5))
-//     //     .connect("100.79.107.11")
-//     //     .await;
-//
-//     let auth = warp::header::exact("Authorization", fmtstr!("Bearer {}", token));
-//     let health = warp::path!("api" / "health").and_then(health_handler);
-//
-//
-//
-//
-//
-//     let routes = health.or(gateway).and(auth);
-//
-//     Ok(warp::serve(routes).run(([0, 0, 0, 0], port)).await)
-// }

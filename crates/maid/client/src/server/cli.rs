@@ -1,9 +1,9 @@
 use crate::helpers;
 use crate::server;
-use crate::structs::{ConnectionData, ConnectionInfo, Maidfile, Task, Websocket};
+use crate::structs::{ConnectionData, ConnectionInfo, Kind, Level, Maidfile, Task, Websocket};
 
 use colored::Colorize;
-use macros_rs::{crashln, fmtstr, then};
+use macros_rs::{crashln, fmtstr};
 use reqwest::blocking::Client;
 use tungstenite::protocol::frame::{coding::CloseCode::Normal, CloseFrame};
 use tungstenite::{client::connect_with_config, client::IntoClientRequest, protocol::WebSocketConfig, Message};
@@ -20,13 +20,14 @@ fn health(client: Client, values: Maidfile) -> server::api::health::Route {
         }
     };
 
-    let body = match response.json::<server::api::health::Route>() {
-        Ok(body) => body,
-        Err(err) => {
-            log::warn!("{err}");
-            crashln!("Unable to connect to the maid server. Is the token correct?")
-        }
-    };
+    let body =
+        match response.json::<server::api::health::Route>() {
+            Ok(body) => body,
+            Err(err) => {
+                log::warn!("{err}");
+                crashln!("Unable to connect to the maid server. Is the token correct?")
+            }
+        };
 
     return body;
 }
@@ -84,12 +85,12 @@ pub fn remote(task: Task) {
     let body = health(client, task.maidfile.clone());
     let (_, websocket, token, host, port) = server::parse::all(task.maidfile.clone());
 
-    crate::log!("info", "connecting to {host}:{port}");
+    crate::log!(Level::Info, "connecting to {host}:{port}");
 
     if body.status.healthy.data == "yes" {
-        crate::log!("notice", "server reports healthy");
+        crate::log!(Level::Notice, "server reports healthy");
     } else {
-        crate::log!("warning", "failed to connect");
+        crate::log!(Level::Warning, "failed to connect");
     }
 
     let websocket_config = WebSocketConfig {
@@ -126,21 +127,12 @@ pub fn remote(task: Task) {
     loop {
         match socket.read() {
             Ok(Message::Text(text)) => {
-                if let Ok(Websocket { time: _, data, level }) = serde_json::from_str::<Websocket>(&text) {
-                    data.get("message").and_then(|m| m.as_str()).map(|msg| {
-                        if level.as_str() == "none" {
-                            print!("{msg}");
-                        } else {
-                            crate::log!(level.as_str(), "{}", msg);
-                        }
-                    });
-
-                    if data.get("binary").map_or(false, |d| d.as_bool().unwrap_or(false)) {
-                        log::debug!("sending archive");
-                        socket.send(Message::Binary(std::fs::read(&file_name).unwrap())).unwrap();
+                if let Ok(Websocket { message, kind, level, .. }) = serde_json::from_str::<Websocket>(&text) {
+                    match kind {
+                        Kind::Done => break,
+                        Kind::Message => crate::log!(level, "{}", message.unwrap()),
+                        Kind::Binary => socket.send(Message::Binary(std::fs::read(&file_name).unwrap())).unwrap(),
                     }
-
-                    then!(data.get("done").map_or(false, |d| d.as_bool().unwrap_or(false)), break);
                 }
             }
             Ok(Message::Binary(archive)) => {
@@ -158,7 +150,7 @@ pub fn remote(task: Task) {
                 server::file::remove_tar(&archive_name);
             }
             Err(err) => {
-                crate::log!("fatal", "{err}");
+                crate::log!(Level::Fatal, "{err}");
                 break;
             }
             _ => (),
