@@ -154,7 +154,7 @@ async fn rocket() -> _ {
     std::env::set_var("RUST_LOG", "info");
 
     globals::init();
-    env_logger::init();
+    pretty_env_logger::init();
 
     let socket = async move {
         let socket = match http {

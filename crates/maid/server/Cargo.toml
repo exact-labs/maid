@@ -13,7 +13,6 @@ uuid.workspace = true
 clap.workspace = true
 flate2.workspace = true
 colored.workspace = true
-env_logger.workspace = true
 clap-verbosity-flag.workspace = true
 global_placeholders.workspace = true
 
@@ -41,3 +40,4 @@ tokio = { version = "1.33.0", features = ["full"] }
 serde = { version = "1.0.192", features = ["derive"] }
 rocket = { version = "0.5.0", features = ["json", "msgpack"] }
 rocket_ws = "0.1.0"
+pretty_env_logger = "0.5.0"
