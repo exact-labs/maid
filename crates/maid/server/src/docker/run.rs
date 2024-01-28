@@ -14,7 +14,7 @@ use bytes::Bytes;
 use flate2::{write::GzEncoder, Compression};
 use futures_core::Stream;
 use futures_util::{stream::TryStreamExt, SinkExt, StreamExt};
-use macros_rs::{fmtstr, str, string};
+use macros_rs::{fmtstr, str, string, then};
 use rocket_ws::{stream::DuplexStream, Message};
 use std::{default::Default, io::Write, path::PathBuf};
 use text_placeholder::Template;
@@ -78,8 +78,8 @@ pub async fn exec(mut stream: DuplexStream, docker: &Result<Docker, anyhow::Erro
         let docker_message =
             Response {
                 level: Level::Docker,
-                message: Some(formatted),
                 kind: Kind::Message,
+                message: Some(formatted),
             };
 
         stream.send(docker_message.into()).await?;
@@ -165,8 +165,10 @@ pub async fn exec(mut stream: DuplexStream, docker: &Result<Docker, anyhow::Erro
 
         Handle!(id, socket, stream.send(build_start_message.into()).await);
 
-        while let Some(Ok(msg)) = output.next().await {
-            if !parsed.info.remote.silent {
+        while let Some(msg) = output.next().await {
+            if let Ok(msg) = msg {
+                then!(parsed.info.remote.silent, continue);
+
                 let output_message = Response {
                     level: Level::None,
                     kind: Kind::Message,
@@ -174,6 +176,8 @@ pub async fn exec(mut stream: DuplexStream, docker: &Result<Docker, anyhow::Erro
                 };
 
                 Handle!(id, socket, stream.send(output_message.into()).await);
+            } else if let Err(err) = msg {
+                log::error!("{err}");
             }
         }
     }
